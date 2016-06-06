@@ -1,5 +1,7 @@
 ![Logo](Screna.png)
 # Screna
+
+[![Join the chat at https://gitter.im/MathewSachin/Screna](https://badges.gitter.im/MathewSachin/Screna.svg)](https://gitter.im/MathewSachin/Screna?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 .Net Capture Solution to Capture Screen/Audio/Video/Mouse Cursor/KeyStrokes and more...
 
 Screna provides a highly extensible API to develop Capturing Apps.

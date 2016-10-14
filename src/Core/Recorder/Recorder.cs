@@ -1,6 +1,7 @@
 // Adapted from SharpAvi Screencast Sample by Vasilli Masillov
 using Screna.Audio;
 using System;
+using System.Drawing;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -145,7 +146,26 @@ namespace Screna
                 {
                     var timestamp = DateTime.Now;
 
-                    var frame = _imageProvider.Capture();
+                    Bitmap frame = null;
+
+                    while (true)
+                    {
+                        try
+                        {
+                            frame = _imageProvider.Capture();
+                            break;
+                        }
+                        catch
+                        {
+                            // Try until we get a frame.
+                            
+                            if (!_stopCapturing.WaitOne(1))
+                                break;
+                        }
+                    }
+
+                    if (frame == null)
+                        continue;
 
                     // Wait for the previous frame is written
                     if (frameWriteTask != null)

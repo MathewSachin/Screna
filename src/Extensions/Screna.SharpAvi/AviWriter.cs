@@ -20,10 +20,10 @@ namespace Screna.Avi
         AviInternalWriter _writer;
         IAviVideoStream _videoStream;
         IAviAudioStream _audioStream;
-        IAudioProvider _audioProvider;
         byte[] _videoBuffer;
         readonly string _fileName;
         readonly AviCodec _codec;
+        readonly object _syncLock = new object();
 
         /// <summary>
         /// Video Frame Rate.
@@ -56,7 +56,6 @@ namespace Screna.Avi
         public void Init(IImageProvider ImageProvider, int FrameRate, IAudioProvider AudioProvider)
         {
             this.FrameRate = FrameRate;
-            _audioProvider = AudioProvider;
             _videoBuffer = new byte[ImageProvider.Width * ImageProvider.Height * 4];
 
             _writer = new AviInternalWriter(_fileName)
@@ -68,7 +67,7 @@ namespace Screna.Avi
             CreateVideoStream(ImageProvider.Width, ImageProvider.Height);
 
             if (AudioProvider != null)
-                CreateAudioStream();
+                CreateAudioStream(AudioProvider);
         }
 
         /// <summary>
@@ -78,7 +77,7 @@ namespace Screna.Avi
         /// <returns>The Task Object.</returns>
         public Task WriteFrameAsync(Bitmap Image)
         {
-            return Task.Run(async () =>
+            return Task.Run(() =>
             {
                 var bits = Image.LockBits(new Rectangle(Point.Empty, Image.Size), ImageLockMode.ReadOnly, PixelFormat.Format32bppRgb);
                 Marshal.Copy(bits.Scan0, _videoBuffer, 0, _videoBuffer.Length);
@@ -86,7 +85,8 @@ namespace Screna.Avi
 
                 Image.Dispose();
 
-                await _videoStream.WriteFrameAsync(true, _videoBuffer, 0, _videoBuffer.Length);
+                lock (_syncLock)
+                    _videoStream.WriteFrameAsync(true, _videoBuffer, 0, _videoBuffer.Length).Wait();
             });
         }
 
@@ -114,9 +114,9 @@ namespace Screna.Avi
             _videoStream.Name = "ScrenaVideo";
         }
 
-        void CreateAudioStream()
+        void CreateAudioStream(IAudioProvider AudioProvider)
         {
-            _audioStream = _writer.AddEncodingAudioStream(new IAudioProviderWrapper(_audioProvider));
+            _audioStream = _writer.AddEncodingAudioStream(new IAudioProviderWrapper(AudioProvider));
 
             _audioStream.Name = "ScrenaAudio";
         }
@@ -137,16 +137,19 @@ namespace Screna.Avi
         /// </summary>
         /// <param name="Buffer">Buffer containing audio data.</param>
         /// <param name="Length">Length of audio data in bytes.</param>
-        public void WriteAudio(byte[] Buffer, int Length) => _audioStream?.WriteBlock(Buffer, 0, Length);
+        public void WriteAudio(byte[] Buffer, int Length)
+        {
+            lock (_syncLock)
+                _audioStream?.WriteBlock(Buffer, 0, Length);
+        }
 
         /// <summary>
         /// Frees all resources used by this object.
         /// </summary>
         public void Dispose()
         {
-            _writer?.Close();
-            
-            _audioProvider?.Dispose();
+            lock (_syncLock)
+                _writer?.Close();
         }
     }
 }

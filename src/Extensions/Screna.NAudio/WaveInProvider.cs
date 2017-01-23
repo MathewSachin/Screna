@@ -24,29 +24,18 @@ namespace Screna.NAudio
         /// <param name="Device">The Recording Device.</param>
         public WaveInProvider(WaveInDevice Device)
             : this(Device, new WaveFormat()) { }
-
+        
         /// <summary>
         /// Creates a new instance of <see cref="WaveInProvider"/>.
         /// </summary>
         /// <param name="Device">The Recording Device.</param>
         /// <param name="Wf"><see cref="WaveFormat"/> to use.</param>
         public WaveInProvider(WaveInDevice Device, WaveFormat Wf)
-            : this(Device, Wf, -1) { }
-
-        /// <summary>
-        /// Creates a new synchronizable instance of <see cref="WaveInProvider"/> to be used with an <see cref="IRecorder"/>.
-        /// </summary>
-        /// <param name="Device">The Recording Device.</param>
-        /// <param name="Wf"><see cref="WaveFormat"/> to use.</param>
-        /// <param name="FrameRate">The <see cref="IRecorder"/>'s FrameRate.</param>
-        public WaveInProvider(WaveInDevice Device, WaveFormat Wf, int FrameRate)
         {
-            IsSynchronizable = FrameRate != -1;
-
             _waveInEvent = new WaveInEvent
             {
                 DeviceNumber = Device.DeviceNumber,
-                BufferMilliseconds = IsSynchronizable ? (int)Math.Ceiling(1000 / (decimal)FrameRate) : 100,
+                BufferMilliseconds = 100,
                 NumberOfBuffers = 3,
                 WaveFormat = new NWaveFormat(Wf.SampleRate, Wf.BitsPerSample, Wf.Channels)
             };
@@ -58,11 +47,6 @@ namespace Screna.NAudio
             _waveInEvent.DataAvailable += (Sender, Args) => DataAvailable?.Invoke(this, new DataAvailableEventArgs(Args.Buffer, Args.BytesRecorded));
         }
         
-        /// <summary>
-        /// Gets whether this <see cref="IAudioProvider"/> is Synchronizable.
-        /// </summary>
-        public bool IsSynchronizable { get; }
-
         /// <summary>
         /// Gets the output <see cref="WaveFormat"/>.
         /// </summary>

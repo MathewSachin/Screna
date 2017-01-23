@@ -31,3 +31,7 @@ The simplest way to contribute is to Star the repositories.
 
 ## Test
 Testing the libraries would also be a huge help.
+
+## Gratipay
+Screna is made and maintained in personal time.
+If you feel generous, you could donate to the [Gratipay team](https://gratipay.com/Screna) or [Mathew Sachin on PayPal](https://www.paypal.me/MathewSachin) to show your support.

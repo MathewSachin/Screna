@@ -35,3 +35,7 @@ Install-Package Screna
 ```
 
 > [Captura](https://github.com/MathewSachin/Captura) is a Capture application demonstrating all the features of Screna.
+
+## Support Us
+Screna is made and maintained in personal time.
+If you feel generous, you could donate to the [Gratipay team](https://gratipay.com/Screna) or [Mathew Sachin on PayPal](https://www.paypal.me/MathewSachin) to show your support.

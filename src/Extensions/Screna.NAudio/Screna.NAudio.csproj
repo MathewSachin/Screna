@@ -28,18 +28,13 @@
     <DefineConstants>TRACE</DefineConstants>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="NAudio, Version=1.7.3.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\NAudio.1.7.3\lib\net35\NAudio.dll</HintPath>
-      <Private>True</Private>
+    <Reference Include="NAudio, Version=1.8.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\NAudio.1.8.0\lib\net35\NAudio.dll</HintPath>
     </Reference>
     <Reference Include="System" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="packages.config" />
-  </ItemGroup>
-  <ItemGroup>
     <Compile Include="LoopbackProvider.cs" />
-    <Compile Include="SilenceProvider.cs" />
     <Compile Include="WaveInDevice.cs" />
     <Compile Include="WaveInProvider.cs" />
   </ItemGroup>
@@ -48,6 +43,9 @@
       <Project>{23cb9adb-ba9f-4618-bd0c-589a00a532e5}</Project>
       <Name>Screna</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

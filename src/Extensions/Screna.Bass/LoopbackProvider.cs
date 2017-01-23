@@ -44,12 +44,7 @@ namespace Screna.Bass
 
             WaveFormat = WaveFormat.CreateIeeeFloatWaveFormat(info.Frequency, info.Channels);
         }
-
-        /// <summary>
-        /// Not synchronizable with video.
-        /// </summary>
-        public bool IsSynchronizable => false;
-        
+                
         /// <summary>
         /// Gets the Wasapi MixFormat used for Loopback.
         /// </summary>

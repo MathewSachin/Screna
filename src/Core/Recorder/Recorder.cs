@@ -21,9 +21,6 @@ namespace Screna
 
         readonly ManualResetEvent _stopCapturing = new ManualResetEvent(false),
             _continueCapturing = new ManualResetEvent(false);
-
-        readonly AutoResetEvent _videoFrameWritten = new AutoResetEvent(false),
-            _audioBlockWritten = new AutoResetEvent(false);
         #endregion
         
         /// <summary>
@@ -78,10 +75,7 @@ namespace Screna
 
             if (_audioProvider == null)
                 return;
-
-            _videoFrameWritten.Set();
-            _audioBlockWritten.Reset();
-
+            
             _audioProvider.Start();
         }
 
@@ -138,7 +132,6 @@ namespace Screna
             try
             {
                 var frameInterval = TimeSpan.FromSeconds(1 / (double)_videoEncoder.FrameRate);
-                Task frameWriteTask = null;
                 var timeTillNextFrame = TimeSpan.Zero;
 
                 while (!_stopCapturing.WaitOne(timeTillNextFrame)
@@ -166,29 +159,14 @@ namespace Screna
 
                     if (frame == null)
                         continue;
-
-                    // Wait for the previous frame is written
-                    if (frameWriteTask != null)
-                    {
-                        frameWriteTask.Wait();
-                        _videoFrameWritten.Set();
-                    }
-
-                    if (_audioProvider != null
-                        && _audioProvider.IsSynchronizable)
-                        if (WaitHandle.WaitAny(new WaitHandle[] { _audioBlockWritten, _stopCapturing }) == 1)
-                            break;
-
+                    
                     // Start asynchronous (encoding and) writing of the new frame
-                    frameWriteTask = _videoEncoder.WriteFrameAsync(frame);
+                    _videoEncoder.WriteFrameAsync(frame);
 
                     timeTillNextFrame = timestamp + frameInterval - DateTime.Now;
                     if (timeTillNextFrame < TimeSpan.Zero)
                         timeTillNextFrame = TimeSpan.Zero;
                 }
-
-                // Wait for the last frame is written
-                frameWriteTask?.Wait();
             }
             catch (Exception e)
             {
@@ -202,16 +180,7 @@ namespace Screna
         {
             try
             {
-                if (_audioProvider.IsSynchronizable)
-                {
-                    if (WaitHandle.WaitAny(new WaitHandle[] { _videoFrameWritten, _stopCapturing }) != 0)
-                        return;
-
-                    _videoEncoder.WriteAudio(e.Buffer, e.Length);
-
-                    _audioBlockWritten.Set();
-                }
-                else _videoEncoder.WriteAudio(e.Buffer, e.Length);
+                _videoEncoder.WriteAudio(e.Buffer, e.Length);
             }
             catch { }
         }

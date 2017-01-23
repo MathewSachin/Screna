@@ -24,22 +24,13 @@ namespace Screna.Bass
         /// <param name="Device">The Recording Device.</param>
         public RecordingProvider(RecordDevice Device)
             : this(Device, new WaveFormat()) { }
-
+        
         /// <summary>
         /// Creates a new instance of <see cref="RecordingProvider"/>.
         /// </summary>
         /// <param name="Device">The Recording Device.</param>
         /// <param name="Wf"><see cref="WaveFormat"/> to use.</param>
         public RecordingProvider(RecordDevice Device, WaveFormat Wf)
-            : this(Device, Wf, -1) { }
-
-        /// <summary>
-        /// Creates a new synchronizable instance of <see cref="RecordingProvider"/> to be used with an <see cref="IRecorder"/>.
-        /// </summary>
-        /// <param name="Device">The Recording Device.</param>
-        /// <param name="Wf"><see cref="WaveFormat"/> to use.</param>
-        /// <param name="FrameRate">The <see cref="IRecorder"/>'s FrameRate.</param>
-        public RecordingProvider(RecordDevice Device, WaveFormat Wf, int FrameRate)
         {
             WaveFormat = Wf;
             
@@ -57,14 +48,10 @@ namespace Screna.Bass
             
             else if (!(Wf.Encoding == WaveFormatEncoding.Pcm && Wf.BitsPerSample == 16))
                 throw new ArgumentException(nameof(Wf));
-
-            IsSynchronizable = FrameRate != -1;
-
-            if (IsSynchronizable)
-                BASS.RecordingBufferLength = 3000 / FrameRate;
             
-            _handle = IsSynchronizable ? BASS.RecordStart(Wf.SampleRate, Wf.Channels, flags, BASS.RecordingBufferLength / 3, Procedure, IntPtr.Zero)
-                                      : BASS.RecordStart(Wf.SampleRate, Wf.Channels, flags, Procedure);
+            BASS.RecordingBufferLength = 300;
+            
+            _handle = BASS.RecordStart(Wf.SampleRate, Wf.Channels, flags, 100, Procedure, IntPtr.Zero);
 
             BASS.ChannelSetSync(_handle, SyncFlags.Free, 0, (H, C, D, U) => RecordingStopped?.Invoke(this, new EndEventArgs(null)));
         }
@@ -85,12 +72,7 @@ namespace Screna.Bass
         /// Stop Recording.
         /// </summary>
         public void Stop() => BASS.ChannelPause(_handle);
-
-        /// <summary>
-        /// Gets whether this <see cref="IAudioProvider"/> is Synchronizable.
-        /// </summary>
-        public bool IsSynchronizable { get; }
-
+        
         /// <summary>
         /// Gets the output <see cref="WaveFormat"/>.
         /// </summary>

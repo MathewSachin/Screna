@@ -26,9 +26,7 @@ namespace Screna.Audio
             
             _audioProvider = AudioProvider;
             _audioEncoder = AudioEncoder;
-
-            IsSynchronizable = AudioProvider.IsSynchronizable;
-
+            
             WaveFormat = AudioEncoder.WaveFormat;
 
             AudioProvider.RecordingStopped += (Sender, Args) => RecordingStopped?.Invoke(Sender, Args);

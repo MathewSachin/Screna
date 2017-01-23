@@ -21,12 +21,7 @@ namespace Screna.Audio
         /// Stop Recording.
         /// </summary>
         void Stop();
-
-        /// <summary>
-        /// Whether this <see cref="IAudioProvider"/> can be synchronized with video.
-        /// </summary>
-        bool IsSynchronizable { get; }
-
+        
         /// <summary>
         /// Indicates recorded data is available.
         /// </summary>

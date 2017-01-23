@@ -52,7 +52,7 @@ namespace Screna.NAudio
                 return;
 
             _silenceOut = new WasapiOut(Device, AudioClientShareMode.Shared, false, 100);
-            _silenceOut.Init(new SilenceProvider());
+            _silenceOut.Init(new SilenceProvider(new global::NAudio.Wave.WaveFormat()));
         }
 
         /// <summary>
@@ -77,12 +77,7 @@ namespace Screna.NAudio
             _capture.StopRecording();
             _silenceOut.Stop();
         }
-
-        /// <summary>
-        /// Not synchronizable with video.
-        /// </summary>
-        public bool IsSynchronizable => false;
-
+        
         /// <summary>
         /// Indicates recorded data is available.
         /// </summary>

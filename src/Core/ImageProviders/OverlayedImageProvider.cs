@@ -1,4 +1,5 @@
-﻿using System.Drawing;
+﻿using System;
+using System.Drawing;
 
 namespace Screna
 {
@@ -9,7 +10,7 @@ namespace Screna
     {
         readonly IOverlay[] _overlays;
         readonly IImageProvider _imageProvider;
-        readonly Point _offset;
+        readonly Func<Point> _offset;
 
         /// <summary>
         /// Creates a new instance of <see cref="OverlayedImageProvider"/>.
@@ -18,6 +19,15 @@ namespace Screna
         /// <param name="Overlays">Array of <see cref="IOverlay"/>(s) to apply.</param>
         /// <param name="Offset">The Offset of the Captured region.</param>
         protected OverlayedImageProvider(IImageProvider ImageProvider, IOverlay[] Overlays, Point Offset = default(Point))
+            : this(ImageProvider, Overlays, () => Offset) { }
+
+        /// <summary>
+        /// Creates a new instance of <see cref="OverlayedImageProvider"/>.
+        /// </summary>
+        /// <param name="ImageProvider">The <see cref="IImageProvider"/> to apply the Overlays on.</param>
+        /// <param name="Overlays">Array of <see cref="IOverlay"/>(s) to apply.</param>
+        /// <param name="Offset">Function returning Offset of the Captured region.</param>
+        protected OverlayedImageProvider(IImageProvider ImageProvider, IOverlay[] Overlays, Func<Point> Offset)
         {
             _imageProvider = ImageProvider;
             _overlays = Overlays;
@@ -38,7 +48,7 @@ namespace Screna
             {
                 if (_overlays != null)
                     foreach (var overlay in _overlays)
-                        overlay?.Draw(g, _offset);
+                        overlay?.Draw(g, _offset());
             }
 
             return bmp;

@@ -6,7 +6,7 @@ namespace Screna
     /// <summary>
     /// Applies Overlays on an <see cref="IImageProvider"/>.
     /// </summary>
-    public abstract class OverlayedImageProvider : IImageProvider
+    public class OverlayedImageProvider : IImageProvider
     {
         readonly IOverlay[] _overlays;
         readonly IImageProvider _imageProvider;
@@ -18,8 +18,8 @@ namespace Screna
         /// <param name="ImageProvider">The <see cref="IImageProvider"/> to apply the Overlays on.</param>
         /// <param name="Overlays">Array of <see cref="IOverlay"/>(s) to apply.</param>
         /// <param name="Offset">The Offset of the Captured region.</param>
-        protected OverlayedImageProvider(IImageProvider ImageProvider, IOverlay[] Overlays, Point Offset = default(Point))
-            : this(ImageProvider, Overlays, () => Offset) { }
+        public OverlayedImageProvider(IImageProvider ImageProvider, Point Offset, params IOverlay[] Overlays)
+            : this(ImageProvider, () => Offset, Overlays) { }
 
         /// <summary>
         /// Creates a new instance of <see cref="OverlayedImageProvider"/>.
@@ -27,7 +27,7 @@ namespace Screna
         /// <param name="ImageProvider">The <see cref="IImageProvider"/> to apply the Overlays on.</param>
         /// <param name="Overlays">Array of <see cref="IOverlay"/>(s) to apply.</param>
         /// <param name="Offset">Function returning Offset of the Captured region.</param>
-        protected OverlayedImageProvider(IImageProvider ImageProvider, IOverlay[] Overlays, Func<Point> Offset)
+        public OverlayedImageProvider(IImageProvider ImageProvider, Func<Point> Offset, params IOverlay[] Overlays)
         {
             _imageProvider = ImageProvider;
             _overlays = Overlays;

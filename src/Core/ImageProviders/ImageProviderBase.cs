@@ -7,17 +7,14 @@ namespace Screna
     /// </summary>
     public abstract class ImageProviderBase : IImageProvider
     {
-        readonly IOverlay[] _overlays;
         readonly Rectangle _rectangle;
 
         /// <summary>
         /// Constructor for <see cref="ImageProviderBase"/>.
         /// </summary>
-        /// <param name="Overlays">Array of <see cref="IOverlay"/>(s) to apply.</param>
         /// <param name="Rectangle">A <see cref="Rectangle"/> representing the captured region.</param>
-        protected ImageProviderBase(IOverlay[] Overlays, Rectangle Rectangle)
+        protected ImageProviderBase(Rectangle Rectangle)
         {
-            _overlays = Overlays;
             _rectangle = Rectangle;
 
             Width = Rectangle.Width;
@@ -32,14 +29,8 @@ namespace Screna
             var bmp = new Bitmap(Width, Height);
 
             using (var g = Graphics.FromImage(bmp))
-            {
                 OnCapture(g);
-
-                if (_overlays != null)
-                    foreach (var overlay in _overlays)
-                        overlay?.Draw(g, _rectangle.Location);
-            }
-
+            
             return bmp;
         }
 
@@ -61,13 +52,6 @@ namespace Screna
         /// <summary>
         /// Frees all resources used by this instance.
         /// </summary>
-        public virtual void Dispose()
-        {
-            if (_overlays == null)
-                return;
-
-            foreach (var overlay in _overlays)
-                overlay?.Dispose();
-        }
+        public virtual void Dispose() { }
     }
 }

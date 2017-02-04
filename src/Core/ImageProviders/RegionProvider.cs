@@ -13,9 +13,8 @@ namespace Screna
         /// Creates a new instance of <see cref="RegionProvider"/>.
         /// </summary>
         /// <param name="Region">Region to Capture.</param>
-        /// <param name="Overlays">Any Overlays to draw.</param>
-        public RegionProvider(Rectangle Region, params IOverlay[] Overlays)
-            : base(Overlays, Region)
+        public RegionProvider(Rectangle Region)
+            : base(Region)
         {
             _region = Region;
         }

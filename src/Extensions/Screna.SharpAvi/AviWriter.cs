@@ -7,7 +7,6 @@ using System.Threading.Tasks;
 using SharpAvi.Codecs;
 using SharpAvi.Output;
 using AviInternalWriter = SharpAvi.Output.AviWriter;
-using IAudioEncoder = Screna.Audio.IAudioEncoder;
 
 namespace Screna.Avi
 {

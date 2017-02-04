@@ -8,6 +8,8 @@
 Screna provides a highly extensible API to develop Capturing Apps.
 
 # News
+* Overlays are now applied using OverlayedImageProvider.
+
 * Added an FFMpegVideoWriter in Screna.FFMpeg namespace which uses ffmpeg.exe for encoding.
 
 * Extension packages now supply libraries instead of source-code.

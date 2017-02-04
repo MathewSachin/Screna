@@ -45,6 +45,7 @@
     <Compile Include="EventArgs\EndEventArgs.cs" />
     <Compile Include="Extensions.cs" />
     <Compile Include="ImageProviders\CroppedImageProvider.cs" />
+    <Compile Include="ImageProviders\OverlayedImageProvider.cs" />
     <Compile Include="ImageProviders\RotatedImageProvider.cs" />
     <Compile Include="VideoWriter\FFMpegVideoWriter.cs" />
     <Compile Include="VideoWriter\GifWriter.cs" />

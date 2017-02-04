@@ -28,19 +28,17 @@ namespace Screna
         /// </summary>
         /// <param name="Window">The Window to Capture.</param>
         /// <param name="BackgroundColor"><see cref="Color"/> to fill blank background.</param>
-        /// <param name="Overlays">Overlays to draw.</param>
-        public WindowProvider(Window Window = null, Color BackgroundColor = default(Color), params IOverlay[] Overlays)
-            : this(() => Window ?? Window.DesktopWindow, BackgroundColor, Overlays) { }
+        public WindowProvider(Window Window = null, Color BackgroundColor = default(Color))
+            : this(() => Window ?? Window.DesktopWindow, BackgroundColor) { }
 
         /// <summary>
         /// Creates a new instance of <see cref="WindowProvider"/>.
         /// </summary>
         /// <param name="WindowFunction">A Function returning the Window to Capture.</param>
         /// <param name="BackgroundColor"><see cref="Color"/> to fill blank background.</param>
-        /// <param name="Overlays">Overlays to draw.</param>
         /// <exception cref="ArgumentNullException"><paramref name="WindowFunction"/> is null.</exception>
-        public WindowProvider(Func<Window> WindowFunction, Color BackgroundColor = default(Color), params IOverlay[] Overlays)
-            : base(Overlays, DesktopRectangle)
+        public WindowProvider(Func<Window> WindowFunction, Color BackgroundColor = default(Color))
+            : base(DesktopRectangle)
         {
             if (WindowFunction == null)
                 throw new ArgumentNullException(nameof(WindowFunction));

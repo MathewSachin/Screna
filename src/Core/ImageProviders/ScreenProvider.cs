@@ -15,10 +15,9 @@ namespace Screna
         /// Creates a new instance of <see cref="ScreenProvider"/>.
         /// </summary>
         /// <param name="Screen">The Screen to Capture.</param>
-        /// <param name="Overlays">Items to Overlay on Captured images.</param>
         /// <exception cref="ArgumentNullException"><paramref name="Screen"/> is null.</exception>
-        public ScreenProvider(Screen Screen, params IOverlay[] Overlays)
-            : base(Overlays, Screen?.Bounds ?? Rectangle.Empty)
+        public ScreenProvider(Screen Screen)
+            : base(Screen?.Bounds ?? Rectangle.Empty)
         {
             if (Screen == null)
                 throw new ArgumentNullException(nameof(Screen));

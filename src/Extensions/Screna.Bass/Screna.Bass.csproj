@@ -28,19 +28,16 @@
     <DefineConstants>TRACE</DefineConstants>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="ManagedBass, Version=0.23.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\ManagedBass.0.23.0\lib\net45\ManagedBass.dll</HintPath>
-      <Private>True</Private>
+    <Reference Include="ManagedBass, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\ManagedBass.1.0.2\lib\net45\ManagedBass.dll</HintPath>
     </Reference>
-    <Reference Include="ManagedBass.PInvoke, Version=0.2.1.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\ManagedBass.PInvoke.0.2.1\lib\net45\ManagedBass.PInvoke.dll</HintPath>
-      <Private>True</Private>
+    <Reference Include="ManagedBass.Mix, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\ManagedBass.Mix.1.0.1\lib\portable-net45+MonoAndroid+uap\ManagedBass.Mix.dll</HintPath>
     </Reference>
     <Reference Include="System" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="LoopbackProvider.cs" />
-    <Compile Include="RecordingProvider.cs" />
+    <Compile Include="MixedAudioProvider.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\Core\Screna.csproj">

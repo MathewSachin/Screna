@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.Runtime.InteropServices;
-using System.Threading.Tasks;
 using SharpAvi.Codecs;
 using SharpAvi.Output;
 using AviInternalWriter = SharpAvi.Output.AviWriter;
@@ -34,7 +33,10 @@ namespace Screna.Avi
         /// </summary>
         /// <param name="FileName">Output file path.</param>
         /// <param name="Codec">The Avi Codec.</param>
-        public AviWriter(string FileName, AviCodec Codec, IImageProvider ImageProvider, int FrameRate, IAudioProvider AudioProvider)
+        /// <param name="ImageProvider">The image source.</param>
+        /// <param name="FrameRate">Video Frame Rate.</param>
+        /// <param name="AudioProvider">The audio source. null = no audio.</param>
+        public AviWriter(string FileName, AviCodec Codec, IImageProvider ImageProvider, int FrameRate, IAudioProvider AudioProvider = null)
         {
             _fileName = FileName;
             _codec = Codec;
@@ -94,7 +96,7 @@ namespace Screna.Avi
 
         void CreateAudioStream(IAudioProvider AudioProvider)
         {
-            _audioStream = _writer.AddEncodingAudioStream(new IAudioProviderWrapper(AudioProvider));
+            _audioStream = _writer.AddEncodingAudioStream(new IAudioProviderAdapter(AudioProvider));
 
             _audioStream.Name = "ScrenaAudio";
         }

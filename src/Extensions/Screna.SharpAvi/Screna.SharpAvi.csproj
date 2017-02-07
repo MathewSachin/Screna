@@ -38,7 +38,7 @@
   <ItemGroup>
     <Compile Include="AviCodec.cs" />
     <Compile Include="AviWriter.cs" />
-    <Compile Include="IAudioProviderWrapper.cs" />
+    <Compile Include="IAudioProviderAdapter.cs" />
     <Compile Include="Mp3EncoderLame.cs" />
   </ItemGroup>
   <ItemGroup>

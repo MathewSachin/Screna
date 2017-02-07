@@ -8,26 +8,39 @@
 Screna provides a highly extensible API to develop Capturing Apps.
 
 # News
+* New implementation of Recorder.
+* Screna.Bass now includes only a MixedAudioProvider.
 * Overlays are now applied using OverlayedImageProvider.
-
 * Added an FFMpegVideoWriter in Screna.FFMpeg namespace which uses ffmpeg.exe for encoding.
-
 * Extension packages now supply libraries instead of source-code.
-
 * Merged Screna.Lame into Screna.SharpAvi.
-
 * Added a BASS audio library extension for Screna.
+* Screna is now composed of a collection of packages, instead of a single one.
 
-* Screna is now composed of a collection of packages, instead of a single one.  
-  Main reasons behind this were licensing issues and the mess involved in copying code from other projects into Screna.
-  
-Package             | Feature
---------------------|--------------------------------------------
-Screna.NAudio       | Audio Recording and Loopback support using [NAudio](https://github.com/NAudio/NAudio) by Mark Heath.
-Screna.MouseKeyHook | Mouse Click and Keystroke Overlays using [MouseKeyHook](https://github.com/gmamaladze/globalmousekeyhook) by George Mamaladze.
-Screna.Bass         | Audio Recording and Loopback support using ManagedBass wrapper over un4seen BASS audio library.
-Screna.SharpAvi     | Avi and Lame (Mp3 Encoding) support using [SharpAvi](https://github.com/baSSiLL/SharpAvi) by Vasilli Massilov.
+# Extensions
 
+## Screna.NAudio
+Audio Recording and Loopback support using [NAudio](https://github.com/NAudio/NAudio) by Mark Heath.
+
+## Screna.MouseKeyHook
+Mouse Click and Keystroke Overlays using [MouseKeyHook](https://github.com/gmamaladze/globalmousekeyhook) by George Mamaladze.
+
+## Screna.Bass
+Audio Recording and Loopback support using [ManagedBass](https://github.com/ManagedBass/ManagedBass) wrapper over un4seen BASS audio library.
+
+Requires [bass.dll](http://www.un4seen.com/download.php?bass24) and [bassmix.dll](http://www.un4seen.com/download.php?bassmix24).
+
+## Screna.SharpAvi
+Avi and Lame (Mp3 Encoding) support using [SharpAvi](https://github.com/baSSiLL/SharpAvi) by Vasilli Massilov.
+
+Requires *lameenc32.dll* or *lameenc64.dll* for Mp3 encoding.
+Download from http://lame.sourceforge.net.
+
+### Some Issues playing Avi files on Windows Media Player
+- Videos shorter than 9 seconds show error.
+- Videos greater than 9 seconds play well but show increased duration.
+
+VLC MediaPlayer was tested with the same files and worked flawlessly.
 
 # Getting Started
 > Requires Visual Studio 2017

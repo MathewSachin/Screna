@@ -22,12 +22,6 @@ namespace Screna.Avi
         byte[] _videoBuffer;
         readonly string _fileName;
         readonly AviCodec _codec;
-        readonly object _syncLock = new object();
-
-        /// <summary>
-        /// Video Frame Rate.
-        /// </summary>
-        public int FrameRate { get; private set; }
         
         /// <summary>
         /// Gets whether Audio is recorded.
@@ -40,21 +34,11 @@ namespace Screna.Avi
         /// </summary>
         /// <param name="FileName">Output file path.</param>
         /// <param name="Codec">The Avi Codec.</param>
-        public AviWriter(string FileName, AviCodec Codec)
+        public AviWriter(string FileName, AviCodec Codec, IImageProvider ImageProvider, int FrameRate, IAudioProvider AudioProvider)
         {
             _fileName = FileName;
             _codec = Codec;
-        }
 
-        /// <summary>
-        /// Initialises the <see cref="IVideoFileWriter"/>. Usually called by an <see cref="IRecorder"/>.
-        /// </summary>
-        /// <param name="ImageProvider">The Image Provider.</param>
-        /// <param name="FrameRate">Video Frame Rate.</param>
-        /// <param name="AudioProvider">The Audio Provider.</param>
-        public void Init(IImageProvider ImageProvider, int FrameRate, IAudioProvider AudioProvider)
-        {
-            this.FrameRate = FrameRate;
             _videoBuffer = new byte[ImageProvider.Width * ImageProvider.Height * 4];
 
             _writer = new AviInternalWriter(_fileName)
@@ -68,25 +52,20 @@ namespace Screna.Avi
             if (AudioProvider != null)
                 CreateAudioStream(AudioProvider);
         }
-
+        
         /// <summary>
-        /// Asynchronously writes an Image frame.
+        /// Writes an Image frame.
         /// </summary>
         /// <param name="Image">The Image frame to write.</param>
-        /// <returns>The Task Object.</returns>
-        public Task WriteFrameAsync(Bitmap Image)
+        public void WriteFrame(Bitmap Image)
         {
-            return Task.Run(() =>
-            {
-                var bits = Image.LockBits(new Rectangle(Point.Empty, Image.Size), ImageLockMode.ReadOnly, PixelFormat.Format32bppRgb);
-                Marshal.Copy(bits.Scan0, _videoBuffer, 0, _videoBuffer.Length);
-                Image.UnlockBits(bits);
+            var bits = Image.LockBits(new Rectangle(Point.Empty, Image.Size), ImageLockMode.ReadOnly, PixelFormat.Format32bppRgb);
+            Marshal.Copy(bits.Scan0, _videoBuffer, 0, _videoBuffer.Length);
+            Image.UnlockBits(bits);
 
-                Image.Dispose();
+            Image.Dispose();
 
-                lock (_syncLock)
-                    _videoStream.WriteFrameAsync(true, _videoBuffer, 0, _videoBuffer.Length).Wait();
-            });
+            _videoStream.WriteFrame(true, _videoBuffer, 0, _videoBuffer.Length);
         }
 
         void CreateVideoStream(int Width, int Height)
@@ -138,8 +117,7 @@ namespace Screna.Avi
         /// <param name="Length">Length of audio data in bytes.</param>
         public void WriteAudio(byte[] Buffer, int Length)
         {
-            lock (_syncLock)
-                _audioStream?.WriteBlock(Buffer, 0, Length);
+            _audioStream?.WriteBlock(Buffer, 0, Length);
         }
 
         /// <summary>
@@ -147,8 +125,7 @@ namespace Screna.Avi
         /// </summary>
         public void Dispose()
         {
-            lock (_syncLock)
-                _writer?.Close();
+            _writer?.Close();
         }
     }
 }

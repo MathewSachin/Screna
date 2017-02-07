@@ -36,17 +36,17 @@ namespace Screna.Avi
 
                 using (var ms = new MemoryStream())
                     using (var writer = new BinaryWriter(ms))
-                {
-                    _provider.WaveFormat.Serialize(writer);
+                    {
+                        _provider.WaveFormat.Serialize(writer);
 
-                    var formatData = new byte[extraSize];
+                        var formatData = new byte[extraSize];
 
-                    ms.Seek(18, SeekOrigin.Begin);
+                        ms.Seek(18, SeekOrigin.Begin);
 
-                    ms.Read(formatData, 0, extraSize);
+                        ms.Read(formatData, 0, extraSize);
 
-                    return formatData;
-                }
+                        return formatData;
+                    }
             }
         }
 

@@ -94,13 +94,12 @@ namespace Screna.FFMpeg
         }
 
         /// <summary>
-        /// Asynchronously writes an Image frame.
+        /// Writes an Image frame.
         /// </summary>
         /// <param name="Image">The Image frame to write.</param>
-        /// <returns>The Task Object.</returns>
-        public Task WriteFrameAsync(Bitmap Image)
+        public void WriteFrame(Bitmap Image)
         {
-            return Task.Run(() => Image.Save(string.Format(_fileNameFormat, _fileIndex++), ImageFormat.Png));
+            Image.Save(string.Format(_fileNameFormat, _fileIndex++), ImageFormat.Png);
         }
     }
 }

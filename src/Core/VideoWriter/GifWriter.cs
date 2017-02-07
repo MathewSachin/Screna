@@ -2,8 +2,6 @@
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.IO;
-using System.Threading.Tasks;
-using Screna.Audio;
 
 namespace Screna
 {
@@ -19,28 +17,24 @@ namespace Screna
         readonly BinaryWriter _writer;
         bool _firstFrame = true;
         readonly object _syncLock = new object();
+
+        readonly int _defaultFrameDelay, _repeat;
         #endregion
 
         /// <summary>
         /// Creates a new instance of GifWriter.
         /// </summary>
         /// <param name="OutStream">The <see cref="Stream"/> to output the Gif to.</param>
-        /// <param name="DefaultFrameDelay">Default Delay between consecutive frames... FrameRate = 1000 / DefaultFrameDelay.</param>
+        /// <param name="FrameRate">Fame Rate.</param>
         /// <param name="Repeat">No of times the Gif should repeat... -1 to repeat indefinitely.</param>
-        public GifWriter(Stream OutStream, int DefaultFrameDelay = 500, int Repeat = -1)
-        {
-            if (OutStream == null)
-                throw new ArgumentNullException(nameof(OutStream));
-
-            if (DefaultFrameDelay <= 0)
-                throw new ArgumentOutOfRangeException(nameof(DefaultFrameDelay));
-
+        public GifWriter(Stream OutStream, int FrameRate, int Repeat = -1)
+        {            
             if (Repeat < -1)
                 throw new ArgumentOutOfRangeException(nameof(Repeat));
 
-            _writer = new BinaryWriter(OutStream);
-            this.DefaultFrameDelay = DefaultFrameDelay;
-            this.Repeat = Repeat;
+            _writer = new BinaryWriter(OutStream ?? throw new ArgumentNullException(nameof(OutStream)));
+            _defaultFrameDelay = 1000 / FrameRate;
+            _repeat = Repeat;
         }
 
         /// <summary>
@@ -51,35 +45,7 @@ namespace Screna
         /// <param name="Repeat">No of times the Gif should repeat... -1 to repeat indefinitely.</param>
         public GifWriter(string FileName, int DefaultFrameDelay = 500, int Repeat = -1)
             : this(new FileStream(FileName, FileMode.OpenOrCreate, FileAccess.Write, FileShare.Read), DefaultFrameDelay, Repeat) { }
-
-        #region Properties
-        /// <summary>
-        /// Gets or Sets the Default Width of a Frame. Used when unspecified.
-        /// </summary>
-        public int DefaultWidth { get; set; }
-
-        /// <summary>
-        /// Gets or Sets the Default Height of a Frame. Used when unspecified.
-        /// </summary>
-        public int DefaultHeight { get; set; }
-
-        /// <summary>
-        /// Gets or Sets the Default Delay in Milliseconds. Used when unspecified.
-        /// </summary>
-        public int DefaultFrameDelay { get; set; }
-
-        /// <summary>
-        /// The Number of Times the Animation must repeat.
-        /// -1 indicates no repeat. 0 indicates repeat indefinitely
-        /// </summary>
-        public int Repeat { get; }
-        #endregion
-
-        /// <summary>
-        /// Frame Rate.
-        /// </summary>
-        public int FrameRate => 1000 / DefaultFrameDelay;
-
+                
         /// <summary>
         /// <see cref="GifWriter"/> does not Support Audio.
         /// </summary>
@@ -90,7 +56,7 @@ namespace Screna
         /// </summary>
         /// <param name="Image">The image to add</param>
         /// <param name="Delay">Delay in Milliseconds between this and last frame.</param>
-        public void WriteFrame(Image Image, int Delay = 0)
+        public void WriteFrame(Image Image, int Delay)
         {
             lock (_syncLock)
                 using (var gifStream = new MemoryStream())
@@ -101,7 +67,7 @@ namespace Screna
                     if (_firstFrame)
                         InitHeader(gifStream, _writer, Image.Width, Image.Height);
 
-                    WriteGraphicControlBlock(gifStream, _writer, Delay == 0 ? DefaultFrameDelay : Delay);
+                    WriteGraphicControlBlock(gifStream, _writer, Delay);
                     WriteImageBlock(gifStream, _writer, !_firstFrame, 0, 0, Image.Width, Image.Height);
 
                     Image.Dispose();
@@ -110,35 +76,12 @@ namespace Screna
             if (_firstFrame)
                 _firstFrame = false;
         }
-
+        
         /// <summary>
-        /// Asynchronously writes a Image frame.
+        /// Writes a Image frame.
         /// </summary>
         /// <param name="Image">Image frame to write.</param>
-        /// <param name="Delay">Delay in milliseconds between this frame and last frame.</param>
-        /// <returns>The Task Object.</returns>
-        public Task WriteFrameAsync(Bitmap Image, int Delay) => Task.Run(() => WriteFrame(Image, Delay));
-
-        /// <summary>
-        /// Initialises the <see cref="IVideoFileWriter"/>. Usually called by an <see cref="IRecorder"/>.
-        /// </summary>
-        /// <param name="ImageProvider">The Image Provider.</param>
-        /// <param name="FrameRate">Video Frame Rate.</param>
-        /// <param name="AudioProvider">The Audio Provider (not supported with GIF).</param>
-        public void Init(IImageProvider ImageProvider, int FrameRate, IAudioProvider AudioProvider)
-        {
-            DefaultFrameDelay = 1000 / FrameRate;
-
-            DefaultWidth = ImageProvider.Width;
-            DefaultHeight = ImageProvider.Height;
-        }
-
-        /// <summary>
-        /// Asynchronously writes a Image frame.
-        /// </summary>
-        /// <param name="Image">Image frame to write.</param>
-        /// <returns>The Task Object.</returns>
-        public Task WriteFrameAsync(Bitmap Image) => Task.Factory.StartNew(() => WriteFrame(Image));
+        public void WriteFrame(Bitmap Image) => WriteFrame(Image, _defaultFrameDelay);
 
         /// <summary>
         /// <see cref="GifWriter"/> does not support Audio.
@@ -152,8 +95,8 @@ namespace Screna
             Writer.Write("GIF".ToCharArray()); // File type
             Writer.Write("89a".ToCharArray()); // File Version
 
-            Writer.Write((short)(DefaultWidth == 0 ? Width : DefaultWidth)); // Initial Logical Width
-            Writer.Write((short)(DefaultHeight == 0 ? Height : DefaultHeight)); // Initial Logical Height
+            Writer.Write((short)Width); // Initial Logical Width
+            Writer.Write((short)Height); // Initial Logical Height
 
             SourceGif.Position = SourceGlobalColorInfoPosition;
             Writer.Write((byte)SourceGif.ReadByte()); // Global Color Table Info
@@ -162,7 +105,7 @@ namespace Screna
             WriteColorTable(SourceGif, Writer);
 
             // App Extension Header for Repeating
-            if (Repeat == -1)
+            if (_repeat == -1)
                 return;
 
             Writer.Write(unchecked((short)0xff21)); // Application Extension Block Identifier
@@ -170,7 +113,7 @@ namespace Screna
             Writer.Write("NETSCAPE2.0".ToCharArray()); // Application Identifier
             Writer.Write((byte)3); // Application block length
             Writer.Write((byte)1);
-            Writer.Write((short)Repeat); // Repeat count for images.
+            Writer.Write((short)_repeat); // Repeat count for images.
             Writer.Write((byte)0); // terminator
         }
 
@@ -240,11 +183,14 @@ namespace Screna
         /// </summary>
         public void Dispose()
         {
-            // Complete File
-            _writer.Write((byte)0x3b); // File Trailer
+            lock (_syncLock)
+            {
+                // Complete File
+                _writer.Write((byte)0x3b); // File Trailer
 
-            _writer.BaseStream.Dispose();
-            _writer.Dispose();
+                _writer.BaseStream.Dispose();
+                _writer.Dispose();
+            }
         }
     }
 }

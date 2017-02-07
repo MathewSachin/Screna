@@ -30,6 +30,7 @@ Screna.SharpAvi     | Avi and Lame (Mp3 Encoding) support using [SharpAvi](https
 
 
 # Getting Started
+> Requires Visual Studio 2017
 
 Install the Package from NuGet.
 ```powershell

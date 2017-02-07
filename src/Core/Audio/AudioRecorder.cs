@@ -5,11 +5,11 @@ namespace Screna.Audio
     /// <summary>
     /// An <see cref="IRecorder"/> for recording only Audio.
     /// </summary>
-    public class AudioRecorder : RecorderBase
+    public class AudioRecorder : IRecorder
     {
         readonly IAudioFileWriter _writer;
         readonly IAudioProvider _audioProvider;
-
+        
         /// <summary>
         /// Creates a new instance of <see cref="AudioRecorder"/>.
         /// </summary>
@@ -18,36 +18,32 @@ namespace Screna.Audio
         /// <exception cref="ArgumentNullException"><paramref name="Provider"/> or <paramref name="Writer"/> is null.</exception>
         public AudioRecorder(IAudioProvider Provider, IAudioFileWriter Writer)
         {
-            if (Provider == null)
-                throw new ArgumentNullException(nameof(Provider));
-
-            if (Writer == null)
-                throw new ArgumentNullException(nameof(Writer));
-
-            _audioProvider = Provider;
-            _writer = Writer;
+            _audioProvider = Provider ?? throw new ArgumentNullException(nameof(Provider));
+            _writer = Writer ?? throw new ArgumentNullException(nameof(Writer));
             
             _audioProvider.DataAvailable += (s, e) => _writer.Write(e.Buffer, 0, e.Length);
-            _audioProvider.RecordingStopped += (s, e) => RaiseRecordingStopped(e.Error);
         }
 
         /// <summary>
-        /// Override this method with the code to start recording.
+        /// Start Recording.
         /// </summary>
-        protected override void OnStart() => _audioProvider.Start();
+        public void Start() => _audioProvider.Start();
 
         /// <summary>
-        /// Override this method with the code to stop recording.
+        /// Stop Recording.
         /// </summary>
-        protected override void OnStop()
+        public void Stop()
+        {
+            _audioProvider?.Stop();
+        }
+
+        /// <summary>
+        /// Frees all resources used by this instance.
+        /// </summary>
+        public void Dispose()
         {
             _audioProvider?.Dispose();
             _writer?.Dispose();
         }
-
-        /// <summary>
-        /// Override this method with the code to pause recording.
-        /// </summary>
-        protected override void OnPause() => _audioProvider.Stop();
     }
 }

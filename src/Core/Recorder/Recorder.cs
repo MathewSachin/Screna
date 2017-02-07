@@ -1,188 +1,133 @@
-// Adapted from SharpAvi Screencast Sample by Vasilli Masillov
-using Screna.Audio;
+﻿using Screna.Audio;
 using System;
+using System.Collections.Concurrent;
 using System.Drawing;
 using System.Threading;
 using System.Threading.Tasks;
+#pragma warning disable 1591
 
 namespace Screna
 {
-    /// <summary>
-    /// Primary implementation of the <see cref="IRecorder"/> interface.
-    /// </summary>
-    public class Recorder : RecorderBase
+    public class Recorder : IRecorder
     {
         #region Fields
-        readonly IAudioProvider _audioProvider;
-        readonly IVideoFileWriter _videoEncoder;
-        readonly IImageProvider _imageProvider;
+        IAudioProvider _audioProvider;
+        IVideoFileWriter _videoWriter;
+        IImageProvider _imageProvider;
 
-        Thread _recordThread;
-
-        readonly ManualResetEvent _stopCapturing = new ManualResetEvent(false),
-            _continueCapturing = new ManualResetEvent(false);
-        #endregion
+        int _frameRate;
         
-        /// <summary>
-        /// Creates a new instance of <see cref="Recorder"/>.
-        /// </summary>
-        /// <param name="Writer">Video File Writer.</param>
-        /// <param name="ImageProvider">Image Provider which provides individual frames.</param>
-        /// <param name="FrameRate">Video frame rate.</param>
-        /// <param name="AudioProvider">Audio Provider which provides audio data.</param>
-        /// <exception cref="ArgumentNullException"><paramref name="Writer"/> or <paramref name="ImageProvider"/> is null. Use <see cref="AudioRecorder"/> if you want to record audio only.</exception>
-        public Recorder(IVideoFileWriter Writer, IImageProvider ImageProvider, int FrameRate, IAudioProvider AudioProvider = null)
+        BlockingCollection<object> _frames = new BlockingCollection<object>();
+        
+        ManualResetEvent _continueCapturing = new ManualResetEvent(false);
+
+        Task _writeTask, _recordTask;
+        #endregion
+
+        public Recorder(IVideoFileWriter VideoWriter, IImageProvider ImageProvider, int FrameRate, IAudioProvider AudioProvider)
         {
-            if (Writer == null)
-                throw new ArgumentNullException(nameof(Writer));
-
-            if (ImageProvider == null)
-                throw new ArgumentNullException(nameof(ImageProvider), 
-                    AudioProvider == null ? $"Use {nameof(AudioRecorder)} if you want to record audio only" 
-                                          : "Argument Null");
-
-            // Init Fields
+            _videoWriter = VideoWriter;
             _imageProvider = ImageProvider;
-            _videoEncoder = Writer;
             _audioProvider = AudioProvider;
-            
-            Writer.Init(ImageProvider, FrameRate, AudioProvider);
 
-            // Audio Init
-            if (_videoEncoder.SupportsAudio
-                && AudioProvider != null)
-                AudioProvider.DataAvailable += AudioDataAvailable;
+            _frameRate = FrameRate;
+            
+            if (VideoWriter.SupportsAudio && AudioProvider != null)
+                AudioProvider.DataAvailable += AudioProvider_DataAvailable;
             else _audioProvider = null;
 
-            // RecordThread Init
-            _recordThread = new Thread(Record)
+            _recordTask = Task.Factory.StartNew(DoRecord);
+            _writeTask = Task.Factory.StartNew(DoWrite);
+        }
+
+        void DoWrite()
+        {
+            while (!_frames.IsCompleted)
             {
-                Name = "Captura.Record",
-                IsBackground = true
-            };
+                _frames.TryTake(out var data);
 
-            // Not Actually Started, Waits for ContinueThread to be Set
-            _recordThread?.Start();
-        }
+                switch (data)
+                {
+                    case Bitmap img:
+                        _videoWriter.WriteFrame(img);
+                        break;
 
-        /// <summary>
-        /// Override this method with the code to start recording.
-        /// </summary>
-        protected override void OnStart()
-        {
-            if (_recordThread != null)
-                _continueCapturing.Set();
-
-            if (_audioProvider == null)
-                return;
-            
-            _audioProvider.Start();
-        }
-
-        /// <summary>
-        /// Override this method with the code to pause recording.
-        /// </summary>
-        protected override void OnPause()
-        {
-            if (_recordThread != null)
-                _continueCapturing.Reset();
-
-            _audioProvider?.Stop();
-        }
-
-        /// <summary>
-        /// Override this method with the code to stop recording.
-        /// </summary>
-        protected override void OnStop()
-        {
-            // Resume if Paused
-            _continueCapturing?.Set();
-
-            // Video
-            if (_recordThread != null)
-            {
-                if (_stopCapturing != null
-                    && !_stopCapturing.SafeWaitHandle.IsClosed)
-                    _stopCapturing.Set();
-
-                if (!_recordThread.Join(500))
-                    _recordThread.Abort();
-
-                _recordThread = null;
+                    case DataAvailableEventArgs args:
+                        _videoWriter.WriteAudio(args.Buffer, args.Length);
+                        break;
+                }   
             }
+        }
 
-            _imageProvider?.Dispose();
+        void DoRecord()
+        {
+            var frameInterval = TimeSpan.FromSeconds(1.0 / _frameRate);
+            
+            while (_continueCapturing.WaitOne() && !_frames.IsAddingCompleted)
+            {
+                var timestamp = DateTime.Now;
 
-            _audioProvider?.Dispose();
+                try { _frames.Add(_imageProvider.Capture()); }
+                catch { }
+                                
+                var timeTillNextFrame = timestamp + frameInterval - DateTime.Now;
+                if (timeTillNextFrame < TimeSpan.Zero)
+                    timeTillNextFrame = TimeSpan.Zero;
 
-            // WaitHandles
-            if (_stopCapturing != null
-                && !_stopCapturing.SafeWaitHandle.IsClosed)
-                _stopCapturing.Dispose();
+                Thread.Sleep(timeTillNextFrame);
+            }
+        }
 
-            if (_continueCapturing != null
-                && !_continueCapturing.SafeWaitHandle.IsClosed)
-                _continueCapturing.Dispose();
-
-            _videoEncoder?.Dispose();
+        void AudioProvider_DataAvailable(object sender, DataAvailableEventArgs e)
+        {
+            try { _frames.Add(e); }
+            catch { }
         }
         
-        void Record()
+        public void Dispose()
         {
-            try
-            {
-                var frameInterval = TimeSpan.FromSeconds(1 / (double)_videoEncoder.FrameRate);
-                var timeTillNextFrame = TimeSpan.Zero;
+            ThrowIfDisposed();
 
-                while (!_stopCapturing.WaitOne(timeTillNextFrame)
-                    && _continueCapturing.WaitOne())
-                {
-                    var timestamp = DateTime.Now;
+            _audioProvider?.Stop();
+            _audioProvider?.Dispose();
 
-                    Bitmap frame = null;
+            _frames.CompleteAdding();
 
-                    while (true)
-                    {
-                        try
-                        {
-                            frame = _imageProvider.Capture();
-                            break;
-                        }
-                        catch
-                        {
-                            // Try until we get a frame.
-                            
-                            if (!_stopCapturing.WaitOne(1))
-                                break;
-                        }
-                    }
+            _continueCapturing.Set();
 
-                    if (frame == null)
-                        continue;
-                    
-                    // Start asynchronous (encoding and) writing of the new frame
-                    _videoEncoder.WriteFrameAsync(frame);
+            _recordTask.Wait();
+            _writeTask.Wait();
 
-                    timeTillNextFrame = timestamp + frameInterval - DateTime.Now;
-                    if (timeTillNextFrame < TimeSpan.Zero)
-                        timeTillNextFrame = TimeSpan.Zero;
-                }
-            }
-            catch (Exception e)
-            {
-                Stop();
+            _videoWriter.Dispose();
+            _frames.Dispose();
+            
+            _continueCapturing.Close();
 
-                RaiseRecordingStopped(e);
-            }
+            _disposed = true;
         }
 
-        void AudioDataAvailable(object sender, DataAvailableEventArgs e)
+        bool _disposed;
+
+        void ThrowIfDisposed()
         {
-            try
-            {
-                _videoEncoder.WriteAudio(e.Buffer, e.Length);
-            }
-            catch { }
+            if (_disposed)
+                throw new ObjectDisposedException("this");
+        }
+
+        public void Start()
+        {
+            ThrowIfDisposed();
+
+            _audioProvider?.Start();
+            _continueCapturing.Set();
+        }
+
+        public void Stop()
+        {
+            ThrowIfDisposed();
+
+            _continueCapturing.Reset();
+            _audioProvider?.Stop();
         }
     }
 }

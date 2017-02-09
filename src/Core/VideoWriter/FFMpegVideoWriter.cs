@@ -3,8 +3,6 @@ using System.Diagnostics;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.IO;
-using System.Threading.Tasks;
-using Screna.Audio;
 
 namespace Screna.FFMpeg
 {
@@ -23,6 +21,7 @@ namespace Screna.FFMpeg
         static readonly string BaseDir = Path.Combine(Path.GetTempPath(), "Screna.FFMpeg");
         int _fileIndex;
         readonly string _fileNameFormat;
+        readonly int _frameRate;
 
         static FFMpegVideoWriter()
         {
@@ -34,9 +33,11 @@ namespace Screna.FFMpeg
         /// Creates a new instance of <see cref="FFMpegVideoWriter"/>.
         /// </summary>
         /// <param name="FileName">Path for the output file... Output video type is determined by the file extension (e.g. ".avi", ".mp4", ".mov").</param>
-        public FFMpegVideoWriter(string FileName)
+        /// <param name="FrameRate">Video Frame Rate.</param>
+        public FFMpegVideoWriter(string FileName, int FrameRate)
         {
             _outFile = FileName;
+            _frameRate = FrameRate;
 
             int val;
 
@@ -56,33 +57,17 @@ namespace Screna.FFMpeg
         {
             var ffmpeg = File.Exists(FFMpegPath) ? FFMpegPath : "ffmpeg.exe";
 
-            var p = Process.Start(ffmpeg, $"-r {FrameRate} -i {Path.Combine(_path, "img-%d.png")} {_outFile}");
+            var p = Process.Start(ffmpeg, $"-r {_frameRate} -i {Path.Combine(_path, "img-%d.png")} {_outFile}");
 
             // TODO: Files are not deleted!!!
             p.Exited += (Sender, Args) => Directory.Delete(_path, true);
         }
-
-        /// <summary>
-        /// Initialises the <see cref="IVideoFileWriter"/>. Usually called by an <see cref="IRecorder"/>.
-        /// </summary>
-        /// <param name="ImageProvider">The Image Provider.</param>
-        /// <param name="FrameRate">Video Frame Rate.</param>
-        /// <param name="AudioProvider">The Audio Provider.</param>
-        public void Init(IImageProvider ImageProvider, int FrameRate, IAudioProvider AudioProvider)
-        {
-            this.FrameRate = FrameRate;
-        }
-
+        
         /// <summary>
         /// Gets whether audio is supported.
         /// </summary>
         public bool SupportsAudio { get; } = false;
-
-        /// <summary>
-        /// Video Frame Rate.
-        /// </summary>
-        public int FrameRate { get; private set; }
-
+        
         /// <summary>
         /// Write audio block to Audio Stream.
         /// </summary>

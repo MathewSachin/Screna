@@ -49,7 +49,6 @@
     <Compile Include="ImageProviders\RotatedImageProvider.cs" />
     <Compile Include="Recorder\IRecorder.cs" />
     <Compile Include="Recorder\Recorder.cs" />
-    <Compile Include="VideoWriter\FFMpegVideoWriter.cs" />
     <Compile Include="VideoWriter\GifWriter.cs" />
     <Compile Include="ImageProviders\ImageProviderBase.cs" />
     <Compile Include="ImageProviders\RegionProvider.cs" />

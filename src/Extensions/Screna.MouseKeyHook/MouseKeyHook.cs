@@ -107,9 +107,6 @@ namespace Screna
         /// </summary>
         public void Draw(Graphics g, Point Offset = default(Point))
         {
-            if (_lastKeyRecord == null || (DateTime.Now - _lastKeyRecord.TimeStamp).TotalSeconds > 2)
-                return;
-
             if (_mouseClicked)
             {
                 var curPos = MouseCursor.CursorPosition;
@@ -123,6 +120,9 @@ namespace Screna
                 _mouseClicked = false;
             }
             
+            if (_lastKeyRecord == null || (DateTime.Now - _lastKeyRecord.TimeStamp).TotalSeconds > 2)
+                return;
+
             var keyStrokeRect = new Rectangle(100, 100, (int)(_output.Length * KeyStrokeFont.Size + 5), 35);
             
             g.FillRectangle(ClickBrush, keyStrokeRect);

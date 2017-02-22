@@ -37,6 +37,7 @@
     <Reference Include="System.Windows.Forms" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="KeyRecord.cs" />
     <Compile Include="MouseKeyHook.cs" />
   </ItemGroup>
   <ItemGroup>

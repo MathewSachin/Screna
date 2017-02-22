@@ -13,39 +13,15 @@ namespace Screna
         #region Fields
         readonly IKeyboardMouseEvents _hook;
 
-        bool _mouseClicked,
-            _control,
-            _shift,
-            _alt;
-
-        Keys _lastKeyPressed = Keys.None;
-        #endregion
-
-        #region Properties
-        /// <summary>
-        /// Gets or Sets the <see cref="Brush"/> used to fill Click circles.
-        /// </summary>
-        public Brush ClickBrush { get; set; }
-
-        /// <summary>
-        /// Gets or Sets the radius of Click circles.
-        /// </summary>
-        public double ClickRadius { get; set; }
-
-        /// <summary>
-        /// Gets or Sets the Keystroke <see cref="Font"/>.
-        /// </summary>
-        public Font KeyStrokeFont { get; set; }
-
-        /// <summary>
-        /// Gets or Sets the Keystroke <see cref="Brush"/>.
-        /// </summary>
-        public Brush KeyStrokeBrush { get; set; }
-
-        /// <summary>
-        /// Gets or Sets the Keystroke Location.
-        /// </summary>
-        public Point KeyStrokeLocation { get; set; }
+        bool _mouseClicked;
+        
+        string _output = string.Empty;
+        KeyRecord _lastKeyRecord;
+        
+        Brush ClickBrush;
+        double ClickRadius;
+        Font KeyStrokeFont;
+        Brush KeyStrokeBrush;
         #endregion
 
         /// <summary>
@@ -58,9 +34,8 @@ namespace Screna
             ClickBrush = new SolidBrush(Color.FromArgb(100, Color.DarkGray));
             ClickRadius = 25;
             KeyStrokeBrush = Brushes.Black;
-            KeyStrokeFont = new Font(FontFamily.GenericMonospace, 60);
-            KeyStrokeLocation = new Point(100, 100);
-
+            KeyStrokeFont = new Font(FontFamily.GenericMonospace, 20);
+            
             _hook = Hook.GlobalEvents();
 
             if (CaptureMouseClicks)
@@ -72,37 +47,59 @@ namespace Screna
 
         void OnKeyPressed(object sender, KeyEventArgs e)
         {
+            if (_output.Length > 15)
+                _output = "";
+
+            var keyRecord = new KeyRecord(e);
+            string key;
+
             switch (e.KeyCode)
             {
                 case Keys.Shift:
                 case Keys.ShiftKey:
                 case Keys.LShiftKey:
                 case Keys.RShiftKey:
-                    _lastKeyPressed = Keys.Shift;
+
+                    key = "Shift";
                     break;
 
                 case Keys.Control:
                 case Keys.ControlKey:
                 case Keys.LControlKey:
                 case Keys.RControlKey:
-                    _lastKeyPressed = Keys.Control;
+
+                    key = "Ctrl";
                     break;
 
                 case Keys.Alt:
                 case Keys.Menu:
                 case Keys.LMenu:
                 case Keys.RMenu:
-                    _lastKeyPressed = Keys.Alt;
+
+                    key = "Alt";
+                    break;
+
+                case Keys.LWin:
+                case Keys.RWin:
+                    key = "Win";
                     break;
 
                 default:
-                    _lastKeyPressed = e.KeyCode;
+                    key = keyRecord.ToString();
+
+                    if (keyRecord.Control || keyRecord.Alt)
+                        _output = "";
                     break;
             }
 
-            _control = e.Control;
-            _shift = e.Shift;
-            _alt = e.Alt;
+            if (key.Length > 1 || (_lastKeyRecord != null &&
+                                    (_lastKeyRecord.ToString().Length > 1 ||
+                                    (keyRecord.TimeStamp - _lastKeyRecord.TimeStamp).TotalSeconds > 2)))
+                _output = "";
+
+            _output += key;
+
+            _lastKeyRecord = keyRecord;
         }
 
         /// <summary>
@@ -110,6 +107,9 @@ namespace Screna
         /// </summary>
         public void Draw(Graphics g, Point Offset = default(Point))
         {
+            if (_lastKeyRecord == null || (DateTime.Now - _lastKeyRecord.TimeStamp).TotalSeconds > 2)
+                return;
+
             if (_mouseClicked)
             {
                 var curPos = MouseCursor.CursorPosition;
@@ -122,30 +122,15 @@ namespace Screna
 
                 _mouseClicked = false;
             }
+            
+            var keyStrokeRect = new Rectangle(100, 100, (int)(_output.Length * KeyStrokeFont.Size + 5), 35);
+            
+            g.FillRectangle(ClickBrush, keyStrokeRect);
 
-            if (_lastKeyPressed == Keys.None)
-                return;
-
-            string toWrite = null;
-
-            if (_control)
-                toWrite += "Ctrl+";
-
-            if (_shift)
-                toWrite += "Shift+";
-
-            if (_alt)
-                toWrite += "Alt+";
-
-            toWrite += _lastKeyPressed.ToString();
-
-            g.DrawString(toWrite,
+            g.DrawString(_output,
                 KeyStrokeFont,
                 KeyStrokeBrush,
-                KeyStrokeLocation.X,
-                KeyStrokeLocation.Y);
-
-            _lastKeyPressed = Keys.None;
+                keyStrokeRect);
         }
 
         /// <summary>

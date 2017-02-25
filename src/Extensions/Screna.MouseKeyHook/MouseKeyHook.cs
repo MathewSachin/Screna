@@ -39,11 +39,13 @@ namespace Screna
             _hook = Hook.GlobalEvents();
 
             if (CaptureMouseClicks)
-                _hook.MouseDown += (s, e) => _mouseClicked = true;
+                _hook.MouseDown += OnMouseDown;
             
             if (CaptureKeystrokes)
                 _hook.KeyDown += OnKeyPressed;
         }
+
+        void OnMouseDown(object sender, EventArgs e) => _mouseClicked = true;
 
         void OnKeyPressed(object sender, KeyEventArgs e)
         {
@@ -136,6 +138,12 @@ namespace Screna
         /// <summary>
         /// Frees all resources used by this object.
         /// </summary>
-        public void Dispose() => _hook?.Dispose();
+        public void Dispose()
+        {
+            _hook.MouseDown -= OnMouseDown;
+            _hook.KeyDown -= OnKeyPressed;
+
+            _hook?.Dispose();
+        }
     }
 }

@@ -110,6 +110,14 @@ namespace Screna
                         result += "/";
                         break;
 
+                    case Keys.NumLock:
+                        result += $"NumLock: {(Console.NumberLock ? "On" : "Off")}";
+                        break;
+
+                    case Keys.CapsLock:
+                        result += $"CapsLock: {(Console.CapsLock ? "On" : "Off")}";
+                        break;
+
                     default:
                         result += Key;
                         break;

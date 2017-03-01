@@ -3,6 +3,7 @@ using ManagedBass;
 using ManagedBass.Mix;
 using System.Runtime.InteropServices;
 using Wf = Screna.Audio.WaveFormat;
+using System.Collections.Generic;
 
 namespace Screna.Audio
 {
@@ -151,6 +152,22 @@ namespace Screna.Audio
             Bass.ChannelPause(_silence);
 
             RecordingStopped?.Invoke(this, new EndEventArgs(null));
+        }
+
+        public static void GetDevices(out IEnumerable<KeyValuePair<int?, string>> RecordingDevices, out IEnumerable<KeyValuePair<int?, string>> LoopbackDevices)
+        {
+            var rec = new List<KeyValuePair<int?, string>>();
+            var loop = new List<KeyValuePair<int?, string>>();
+
+            for (int i = 0; Bass.RecordGetDeviceInfo(i, out var info); ++i)
+            {
+                if (info.IsLoopback)
+                    loop.Add(new KeyValuePair<int?, string>(i, info.Name));
+                else rec.Add(new KeyValuePair<int?, string>(i, info.Name));
+            }
+
+            RecordingDevices = rec;
+            LoopbackDevices = loop;
         }
     }
 }

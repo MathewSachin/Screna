@@ -8,6 +8,7 @@
 Screna provides a highly extensible API to develop Capturing Apps.
 
 # News
+* Dropped Lame encoding using SharpAvi support.
 * New implementation of Recorder.
 * Screna.Bass now includes only a MixedAudioProvider.
 * Overlays are now applied using OverlayedImageProvider.
@@ -31,10 +32,7 @@ Audio Recording and Loopback support using [ManagedBass](https://github.com/Mana
 Requires [bass.dll](http://www.un4seen.com/download.php?bass24) and [bassmix.dll](http://www.un4seen.com/download.php?bassmix24).
 
 ## Screna.SharpAvi
-Avi and Lame (Mp3 Encoding) support using [SharpAvi](https://github.com/baSSiLL/SharpAvi) by Vasilli Massilov.
-
-Requires *lameenc32.dll* or *lameenc64.dll* for Mp3 encoding.
-Download from http://lame.sourceforge.net.
+Avi support using [SharpAvi](https://github.com/baSSiLL/SharpAvi) by Vasilli Massilov.
 
 ### Some Issues playing Avi files on Windows Media Player
 - Videos shorter than 9 seconds show error.

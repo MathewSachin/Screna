@@ -15,11 +15,10 @@ namespace Screna.Avi
     public class AviWriter : IVideoFileWriter
     {
         #region Fields
-        AviInternalWriter _writer;
+        readonly AviInternalWriter _writer;
         IAviVideoStream _videoStream;
         IAviAudioStream _audioStream;
-        byte[] _videoBuffer;
-        readonly string _fileName;
+        readonly byte[] _videoBuffer;
         readonly AviCodec _codec;
         
         /// <summary>
@@ -38,12 +37,11 @@ namespace Screna.Avi
         /// <param name="AudioProvider">The audio source. null = no audio.</param>
         public AviWriter(string FileName, AviCodec Codec, IImageProvider ImageProvider, int FrameRate, IAudioProvider AudioProvider = null)
         {
-            _fileName = FileName;
             _codec = Codec;
 
             _videoBuffer = new byte[ImageProvider.Width * ImageProvider.Height * 4];
 
-            _writer = new AviInternalWriter(_fileName)
+            _writer = new AviInternalWriter(FileName)
             {
                 FramesPerSecond = FrameRate,
                 EmitIndex1 = true

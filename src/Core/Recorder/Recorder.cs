@@ -14,18 +14,18 @@ namespace Screna
     public class Recorder : IRecorder
     {
         #region Fields
-        IAudioProvider _audioProvider;
-        IVideoFileWriter _videoWriter;
-        IAudioFileWriter _audioWriter;
-        IImageProvider _imageProvider;
+        readonly IAudioProvider _audioProvider;
+        readonly IVideoFileWriter _videoWriter;
+        readonly IAudioFileWriter _audioWriter;
+        readonly IImageProvider _imageProvider;
 
-        int _frameRate;
-        
-        BlockingCollection<object> _frames = new BlockingCollection<object>();
-        
-        ManualResetEvent _continueCapturing;
+        readonly int _frameRate;
 
-        Task _writeTask, _recordTask;
+        readonly BlockingCollection<object> _frames = new BlockingCollection<object>();
+
+        readonly ManualResetEvent _continueCapturing;
+
+        readonly Task _writeTask, _recordTask;
         #endregion
 
         /// <summary>

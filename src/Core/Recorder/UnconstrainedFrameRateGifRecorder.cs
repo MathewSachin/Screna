@@ -9,12 +9,12 @@ namespace Screna
     public class UnconstrainedFrameRateGifRecorder : IRecorder
     {
         #region Fields
-        GifWriter _videoEncoder;
-        IImageProvider _imageProvider;
+        readonly GifWriter _videoEncoder;
+        readonly IImageProvider _imageProvider;
 
-        Thread _recordThread;
+        readonly Thread _recordThread;
 
-        ManualResetEvent _stopCapturing = new ManualResetEvent(false),
+        readonly ManualResetEvent _stopCapturing = new ManualResetEvent(false),
             _continueCapturing = new ManualResetEvent(false);
         #endregion
 

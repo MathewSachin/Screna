@@ -17,11 +17,11 @@ namespace Screna
         
         string _output = string.Empty;
         KeyRecord _lastKeyRecord;
-        
-        Brush ClickBrush;
-        double ClickRadius;
-        Font KeyStrokeFont;
-        Brush KeyStrokeBrush;
+
+        readonly Brush _clickBrush = new SolidBrush(Color.FromArgb(100, Color.DarkGray));
+        readonly double _clickRadius = 25;
+        readonly Font _keyStrokeFont = new Font(FontFamily.GenericMonospace, 20);
+        readonly Brush _keyStrokeBrush = Brushes.Black;
         #endregion
 
         /// <summary>
@@ -31,11 +31,6 @@ namespace Screna
         /// <param name="CaptureKeystrokes">Whether to capture Keystrokes.</param>
         public MouseKeyHook(bool CaptureMouseClicks, bool CaptureKeystrokes)
         {
-            ClickBrush = new SolidBrush(Color.FromArgb(100, Color.DarkGray));
-            ClickRadius = 25;
-            KeyStrokeBrush = Brushes.Black;
-            KeyStrokeFont = new Font(FontFamily.GenericMonospace, 20);
-            
             _hook = Hook.GlobalEvents();
 
             if (CaptureMouseClicks)
@@ -112,11 +107,11 @@ namespace Screna
             if (_mouseClicked)
             {
                 var curPos = MouseCursor.CursorPosition;
-                var d = (float)(ClickRadius * 2);
+                var d = (float)(_clickRadius * 2);
                 
-                g.FillEllipse(ClickBrush,
-                    curPos.X - (float)ClickRadius - Offset.X,
-                    curPos.Y - (float)ClickRadius - Offset.Y,
+                g.FillEllipse(_clickBrush,
+                    curPos.X - (float)_clickRadius - Offset.X,
+                    curPos.Y - (float)_clickRadius - Offset.Y,
                     d, d);
 
                 _mouseClicked = false;
@@ -125,13 +120,13 @@ namespace Screna
             if (_lastKeyRecord == null || (DateTime.Now - _lastKeyRecord.TimeStamp).TotalSeconds > 2)
                 return;
 
-            var keyStrokeRect = new Rectangle(100, 100, (int)(_output.Length * KeyStrokeFont.Size + 5), 35);
+            var keyStrokeRect = new Rectangle(100, 100, (int)(_output.Length * _keyStrokeFont.Size + 5), 35);
             
-            g.FillRectangle(ClickBrush, keyStrokeRect);
+            g.FillRectangle(_clickBrush, keyStrokeRect);
 
             g.DrawString(_output,
-                KeyStrokeFont,
-                KeyStrokeBrush,
+                _keyStrokeFont,
+                _keyStrokeBrush,
                 keyStrokeRect);
         }
 

@@ -7,16 +7,12 @@ namespace Screna
     /// </summary>
     public abstract class ImageProviderBase : IImageProvider
     {
-        readonly Rectangle _rectangle;
-
         /// <summary>
         /// Constructor for <see cref="ImageProviderBase"/>.
         /// </summary>
         /// <param name="Rectangle">A <see cref="Rectangle"/> representing the captured region.</param>
         protected ImageProviderBase(Rectangle Rectangle)
         {
-            _rectangle = Rectangle;
-
             Width = Rectangle.Width;
             Height = Rectangle.Height;
         }

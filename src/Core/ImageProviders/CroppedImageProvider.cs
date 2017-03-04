@@ -28,6 +28,9 @@ namespace Screna
             
             _sourceImageProvider = Source;
             _cropRectangle = CropRectangle;
+
+            Width = CropRectangle.Width;
+            Height = CropRectangle.Height;
         }
 
         /// <summary>

@@ -147,7 +147,7 @@ namespace Screna
         /// true if the specified object  is equal to the current object; otherwise, false.
         /// </returns>
         /// <param name="obj">The object to compare with the current object. </param>
-        public override bool Equals(object obj) => obj is Window && (obj as Window).Handle == Handle;
+        public override bool Equals(object obj) => obj is Window w && w.Handle == Handle;
         
         /// <summary>
         /// Serves as the default hash function. 

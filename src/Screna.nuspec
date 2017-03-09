@@ -1,0 +1,31 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2011/08/nuspec.xsd">
+    <metadata>
+        <id>Screna</id>
+        <version>0.5.0</version>
+        <title>Screna</title>
+        <authors>Mathew Sachin</authors>
+        <owners>Mathew Sachin</owners>
+        <licenseUrl>https://raw.githubusercontent.com/MathewSachin/Screna/master/LICENSE.md</licenseUrl>
+        <projectUrl>https://github.com/MathewSachin/Screna/</projectUrl>
+        <iconUrl>https://raw.githubusercontent.com/MathewSachin/Screna/master/Screna.png</iconUrl>
+        <requireLicenseAcceptance>false</requireLicenseAcceptance>
+        <description>
+.Net Capture Solution to Capture Screen/Audio/Video/Mouse Cursor/KeyStrokes and more... with a highly extensible API
+        </description>
+        <summary>.Net Capture Solution to Capture Screen/Audio/Video/Mouse Cursor/KeyStrokes and more... with a highly extensible API</summary>
+        <releaseNotes>
+        </releaseNotes>
+        <copyright>(c) 2016 Mathew Sachin</copyright>
+        <tags>C# Screen Capture ScreenShot ScreenWorks Screna ScreenCast Wasapi Loopback Record Recording</tags>
+        <frameworkAssemblies>
+            <frameworkAssembly assemblyName="System" targetFramework=".NETFramework4.0" />
+            <frameworkAssembly assemblyName="System.Drawing" targetFramework=".NETFramework4.0" />
+            <frameworkAssembly assemblyName="System.Windows.Forms" targetFramework=".NETFramework4.0" />
+        </frameworkAssemblies>
+    </metadata>
+    <files>
+        <file src="bin\Release\Screna.dll" target="lib\net40" />
+        <file src="bin\Release\Screna.xml" target="lib\net40" />
+    </files>
+</package>

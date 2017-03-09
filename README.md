@@ -8,6 +8,7 @@
 Screna provides a highly extensible API to develop Capturing Apps.
 
 # News
+* Dropped Extensions support, old NuGet packages may remain. Most of the Extensions are available in Captura project.
 * Dropped Lame encoding using SharpAvi support.
 * New implementation of Recorder.
 * Screna.Bass now includes only a MixedAudioProvider.
@@ -17,28 +18,6 @@ Screna provides a highly extensible API to develop Capturing Apps.
 * Merged Screna.Lame into Screna.SharpAvi.
 * Added a BASS audio library extension for Screna.
 * Screna is now composed of a collection of packages, instead of a single one.
-
-# Extensions
-
-## Screna.NAudio
-Audio Recording and Loopback support using [NAudio](https://github.com/NAudio/NAudio) by Mark Heath.
-
-## Screna.MouseKeyHook
-Mouse Click and Keystroke Overlays using [MouseKeyHook](https://github.com/gmamaladze/globalmousekeyhook) by George Mamaladze.
-
-## Screna.Bass
-Audio Recording and Loopback support using [ManagedBass](https://github.com/ManagedBass/ManagedBass) wrapper over un4seen BASS audio library.
-
-Requires [bass.dll](http://www.un4seen.com/download.php?bass24) and [bassmix.dll](http://www.un4seen.com/download.php?bassmix24).
-
-## Screna.SharpAvi
-Avi support using [SharpAvi](https://github.com/baSSiLL/SharpAvi) by Vasilli Massilov.
-
-### Some Issues playing Avi files on Windows Media Player
-- Videos shorter than 9 seconds show error.
-- Videos greater than 9 seconds play well but show increased duration.
-
-VLC MediaPlayer was tested with the same files and worked flawlessly.
 
 # Getting Started
 > Requires Visual Studio 2017

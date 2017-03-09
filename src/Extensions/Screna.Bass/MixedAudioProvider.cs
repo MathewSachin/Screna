@@ -154,6 +154,9 @@ namespace Screna.Audio
             RecordingStopped?.Invoke(this, new EndEventArgs(null));
         }
 
+        /// <summary>
+        /// Gets Recording and Loopback Devices as (Index, Name).
+        /// </summary>
         public static void GetDevices(out IEnumerable<KeyValuePair<int?, string>> RecordingDevices, out IEnumerable<KeyValuePair<int?, string>> LoopbackDevices)
         {
             var rec = new List<KeyValuePair<int?, string>>();

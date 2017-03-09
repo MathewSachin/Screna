@@ -69,6 +69,8 @@ namespace Screna
         /// </summary>
         public virtual void Dispose()
         {
+            _imageProvider.Dispose();
+
             if (_overlays == null)
                 return;
 

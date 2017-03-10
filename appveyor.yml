@@ -2,12 +2,13 @@ version: 0.5.0.{build}
 
 configuration: Release
 
+image: Visual Studio 2017
+
 before_build:
   - nuget restore src\Screna.sln
 
-# Build Off till AppVeyor support VS 2017
 build: off
-  #project: src\Screna.sln
-  #publish_nuget: true
-  #publish_nuget_symbols: true
-  #verbosity: minimal
+  project: src\Screna.sln
+  publish_nuget: true
+  publish_nuget_symbols: true
+  verbosity: minimal

@@ -136,7 +136,7 @@ namespace Screna
             }
             else _audioWriter.Dispose();
 
-            _imageProvider.Dispose();
+            _imageProvider?.Dispose();
 
             _disposed = true;
         }

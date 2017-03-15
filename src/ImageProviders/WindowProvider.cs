@@ -59,9 +59,7 @@ namespace Screna
             if (windowHandle != Window.DesktopWindow.Handle
                 && windowHandle != IntPtr.Zero)
             {
-                RECT r;
-
-                if (User32.GetWindowRect(windowHandle, out r))
+                if (User32.GetWindowRect(windowHandle, out var r))
                     rect = r.ToRectangle();
             }
             

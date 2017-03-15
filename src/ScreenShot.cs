@@ -55,8 +55,7 @@ namespace Screna
         /// <returns>The Captured Image.</returns>
         public static Bitmap Capture(Window Window, bool IncludeCursor = false)
         {
-            RECT r;
-            User32.GetWindowRect(Window.Handle, out r);
+            User32.GetWindowRect(Window.Handle, out var r);
             var region = r.ToRectangle();
 
             IntPtr hSrc = GetWindowDC(Window.Handle),

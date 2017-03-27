@@ -97,10 +97,9 @@ namespace Screna
                 catch { }
                                 
                 var timeTillNextFrame = timestamp + frameInterval - DateTime.Now;
-                if (timeTillNextFrame < TimeSpan.Zero)
-                    timeTillNextFrame = TimeSpan.Zero;
 
-                Thread.Sleep(timeTillNextFrame);
+                if (timeTillNextFrame > TimeSpan.Zero)
+                    Thread.Sleep(timeTillNextFrame);
             }
         }
 
@@ -110,8 +109,9 @@ namespace Screna
             catch { }
         }
 
+        #region Dispose
         /// <summary>
-        /// Frees al resources used by this instance.
+        /// Frees all resources used by this instance.
         /// </summary>
         public void Dispose()
         {
@@ -148,6 +148,7 @@ namespace Screna
             if (_disposed)
                 throw new ObjectDisposedException("this");
         }
+        #endregion
 
         /// <summary>
         /// Start Recording.

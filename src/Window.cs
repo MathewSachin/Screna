@@ -85,7 +85,7 @@ namespace Screna
         /// <summary>
         /// Gets the Foreground Window.
         /// </summary>
-        public static Window ForegroundWindow { get; } = new Window(GetForegroundWindow());
+        public static Window ForegroundWindow => new Window(GetForegroundWindow());
         
         /// <summary>
         /// Gets the Taskbar Window - Shell_TrayWnd.

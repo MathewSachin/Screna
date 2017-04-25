@@ -7,20 +7,12 @@
 
 Screna provides a highly extensible API to develop Capturing Apps.
 
-# News
-* Dropped Extensions support, old NuGet packages may remain. Most of the Extensions are available in Captura project.
-* Dropped Lame encoding using SharpAvi support.
-* New implementation of Recorder.
-* Screna.Bass now includes only a MixedAudioProvider.
-* Overlays are now applied using OverlayedImageProvider.
-* Added an FFMpegVideoWriter in Screna.FFMpeg namespace which uses ffmpeg.exe for encoding.
-* Extension packages now supply libraries instead of source-code.
-* Merged Screna.Lame into Screna.SharpAvi.
-* Added a BASS audio library extension for Screna.
-* Screna is now composed of a collection of packages, instead of a single one.
+# About Extension projects
+Dropped Extensions support, old NuGet packages may remain.
+Most of the Extensions are available in Captura project.
 
 # Getting Started
-> Requires Visual Studio 2017
+> Requires Visual Studio 2017 for building
 
 Install the Package from NuGet.
 ```powershell

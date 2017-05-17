@@ -27,6 +27,9 @@ namespace Screna
 
         [DllImport(DllName)]
         static extern bool GetCursorPos(ref Point lpPoint);
+
+        [DllImport("gdi32.dll")]
+        static extern bool DeleteObject(IntPtr HObject);
         #endregion
 
         const int CursorShowing = 1;
@@ -88,8 +91,11 @@ namespace Screna
             if (_hIcon != IntPtr.Zero)
                 using (var cursorBmp = Icon.FromHandle(_hIcon).ToBitmap())
                     g.DrawImage(cursorBmp, new Rectangle(location, cursorBmp.Size));
-
+            
             DestroyIcon(_hIcon);
+
+            DeleteObject(_icInfo.hbmColor);
+            DeleteObject(_icInfo.hbmMask);
         }
 
         /// <summary>

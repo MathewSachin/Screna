@@ -7,4 +7,4 @@
 [assembly: AssemblyCopyright("Copyright © 2016 Mathew Sachin")]
 [assembly: AssemblyTrademark("Screna")]
 
-[assembly: AssemblyVersion("0.5.0")]
+[assembly: AssemblyVersion("0.7.0")]

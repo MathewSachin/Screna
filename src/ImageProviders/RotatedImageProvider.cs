@@ -19,10 +19,7 @@ namespace Screna
         /// <exception cref="ArgumentNullException"><paramref name="Source"/> is null.</exception>
         public RotatedImageProvider(IImageProvider Source, RotateFlipType RotateFlipType)
         {
-            if (Source == null)
-                throw new ArgumentNullException(nameof(Source));
-            
-            _sourceImageProvider = Source;
+            _sourceImageProvider = Source ?? throw new ArgumentNullException(nameof(Source));
             _rotateFlipType = RotateFlipType;
 
             var flipDimensions = (int)RotateFlipType % 2 != 0;

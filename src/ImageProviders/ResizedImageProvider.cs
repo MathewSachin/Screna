@@ -23,10 +23,7 @@ namespace Screna
         /// <param name="BackgroundColor">Background Color to fill any left space.</param>
         public ResizedImageProvider(IImageProvider ImageSource, int TargetWidth, int TargetHeight, Color BackgroundColor)
         {
-            if (ImageSource == null)
-                throw new ArgumentNullException(nameof(ImageSource));
-
-            _imageSource = ImageSource;
+            _imageSource = ImageSource ?? throw new ArgumentNullException(nameof(ImageSource));
             _backgroundColor = BackgroundColor;
 
             Height = TargetHeight;

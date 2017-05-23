@@ -1,6 +1,7 @@
 ﻿using Screna.Native;
 using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
@@ -74,6 +75,22 @@ namespace Screna
                 var title = new StringBuilder(GetWindowTextLength(Handle) + 1);
                 GetWindowText(Handle, title, title.Capacity);
                 return title.ToString();
+            }
+        }
+
+        /// <summary>
+        /// Get the Window Rectangle
+        /// </summary>
+        public Rectangle Rectangle
+        {
+            get
+            {
+                if (User32.GetWindowRect(Handle, out var rect))
+                {
+                    return new Rectangle(rect.Left, rect.Top, rect.Right - rect.Left, rect.Bottom - rect.Top);
+                }
+
+                return Rectangle.Empty;
             }
         }
 

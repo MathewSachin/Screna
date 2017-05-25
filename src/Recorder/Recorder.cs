@@ -68,38 +68,52 @@ namespace Screna
 
         void DoWrite()
         {
-            while (!_frames.IsCompleted)
+            try
             {
-                _frames.TryTake(out var data);
-
-                switch (data)
+                while (!_frames.IsCompleted)
                 {
-                    case Bitmap img:
-                        _videoWriter.WriteFrame(img);
-                        break;
+                    _frames.TryTake(out var data);
 
-                    case DataAvailableEventArgs args:
-                        _videoWriter.WriteAudio(args.Buffer, args.Length);
-                        break;
-                }   
+                    switch (data)
+                    {
+                        case Bitmap img:
+                            _videoWriter.WriteFrame(img);
+                            break;
+
+                        case DataAvailableEventArgs args:
+                            _videoWriter.WriteAudio(args.Buffer, args.Length);
+                            break;
+                    }
+                }
+            }
+            catch (Exception E)
+            {
+                ErrorOccured?.Invoke(E);
             }
         }
 
         void DoRecord()
         {
-            var frameInterval = TimeSpan.FromSeconds(1.0 / _frameRate);
-            
-            while (_continueCapturing.WaitOne() && !_frames.IsAddingCompleted)
+            try
             {
-                var timestamp = DateTime.Now;
+                var frameInterval = TimeSpan.FromSeconds(1.0 / _frameRate);
 
-                try { _frames.Add(_imageProvider.Capture()); }
-                catch { }
-                                
-                var timeTillNextFrame = timestamp + frameInterval - DateTime.Now;
+                while (_continueCapturing.WaitOne() && !_frames.IsAddingCompleted)
+                {
+                    var timestamp = DateTime.Now;
 
-                if (timeTillNextFrame > TimeSpan.Zero)
-                    Thread.Sleep(timeTillNextFrame);
+                    try { _frames.Add(_imageProvider.Capture()); }
+                    catch { }
+
+                    var timeTillNextFrame = timestamp + frameInterval - DateTime.Now;
+
+                    if (timeTillNextFrame > TimeSpan.Zero)
+                        Thread.Sleep(timeTillNextFrame);
+                }
+            }
+            catch (Exception E)
+            {
+                ErrorOccured?.Invoke(E);
             }
         }
 
@@ -142,6 +156,11 @@ namespace Screna
         }
 
         bool _disposed;
+
+        /// <summary>
+        /// Fired when an error occurs
+        /// </summary>
+        public event Action<Exception> ErrorOccured;
 
         void ThrowIfDisposed()
         {

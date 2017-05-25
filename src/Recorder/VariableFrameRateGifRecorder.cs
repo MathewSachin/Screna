@@ -6,7 +6,7 @@ namespace Screna
     /// <summary>
     /// An <see cref="IRecorder"/> which records to a Gif using Delay for each frame instead of Frame Rate.
     /// </summary>
-    public class UnconstrainedFrameRateGifRecorder : IRecorder
+    public class VariableFrameRateGifRecorder : IRecorder
     {
         #region Fields
         readonly GifWriter _videoEncoder;
@@ -19,12 +19,12 @@ namespace Screna
         #endregion
 
         /// <summary>
-        /// Creates a new instance of <see cref="UnconstrainedFrameRateGifRecorder"/>.
+        /// Creates a new instance of <see cref="VariableFrameRateGifRecorder"/>.
         /// </summary>
         /// <param name="Encoder">The <see cref="GifWriter"/> to write into.</param>
         /// <param name="ImageProvider">The <see cref="IImageProvider"/> providing the individual frames.</param>
         /// <exception cref="ArgumentNullException"><paramref name="Encoder"/> or <paramref name="ImageProvider"/> is null.</exception>
-        public UnconstrainedFrameRateGifRecorder(GifWriter Encoder, IImageProvider ImageProvider)
+        public VariableFrameRateGifRecorder(GifWriter Encoder, IImageProvider ImageProvider)
         {
             // Init Fields
             _imageProvider = ImageProvider ?? throw new ArgumentNullException(nameof(ImageProvider));
@@ -88,7 +88,15 @@ namespace Screna
                     _videoEncoder.WriteFrame(frame, delay);
                 }
             }
-            catch { Dispose(); }
+            catch (Exception E)
+            {
+                ErrorOccured?.Invoke(E);
+            }
         }
+
+        /// <summary>
+        /// Fired when an Error occurs.
+        /// </summary>
+        public event Action<Exception> ErrorOccured;
     }
 }

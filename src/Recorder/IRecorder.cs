@@ -16,5 +16,10 @@ namespace Screna
         /// Stop Recording.
         /// </summary>
         void Stop();
+
+        /// <summary>
+        /// Fired when an error occurs.
+        /// </summary>
+        event Action<Exception> ErrorOccured;
     }
 }

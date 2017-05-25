@@ -27,10 +27,7 @@ namespace Screna.Audio
             if (OutStream == null)
                 throw new ArgumentNullException(nameof(OutStream));
 
-            if (Format == null)
-                throw new ArgumentNullException(nameof(Format));
-
-            _format = Format;
+            _format = Format ?? throw new ArgumentNullException(nameof(Format));
             _riff = Riff;
 
             _writer = new BinaryWriter(OutStream, UTF8);

@@ -1,4 +1,4 @@
-﻿﻿using System;
+using System;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.IO;
@@ -13,11 +13,9 @@ namespace Screna
         #region Fields
         const long SourceGlobalColorInfoPosition = 10,
             SourceImageBlockPosition = 789;
-        
+
         readonly BinaryWriter _writer;
         bool _firstFrame = true;
-        readonly object _syncLock = new object();
-
         readonly int _defaultFrameDelay, _repeat;
         #endregion
 
@@ -28,7 +26,7 @@ namespace Screna
         /// <param name="FrameRate">Fame Rate.</param>
         /// <param name="Repeat">No of times the Gif should repeat... -1 to repeat indefinitely.</param>
         public GifWriter(Stream OutStream, int FrameRate, int Repeat = -1)
-        {            
+        {
             if (Repeat < -1)
                 throw new ArgumentOutOfRangeException(nameof(Repeat));
 
@@ -45,11 +43,13 @@ namespace Screna
         /// <param name="Repeat">No of times the Gif should repeat... -1 to repeat indefinitely.</param>
         public GifWriter(string FileName, int DefaultFrameDelay = 500, int Repeat = -1)
             : this(new FileStream(FileName, FileMode.OpenOrCreate, FileAccess.Write, FileShare.Read), DefaultFrameDelay, Repeat) { }
-                
+
         /// <summary>
         /// <see cref="GifWriter"/> does not Support Audio.
         /// </summary>
         public void WriteAudio(byte[] Buffer, int Count) { }
+
+        readonly MemoryStream gifStream = new MemoryStream();
 
         /// <summary>
         /// Adds a frame to this animation.
@@ -58,25 +58,26 @@ namespace Screna
         /// <param name="Delay">Delay in Milliseconds between this and last frame.</param>
         public void WriteFrame(Image Image, int Delay)
         {
-            lock (_syncLock)
-                using (var gifStream = new MemoryStream())
-                {
-                    Image.Save(gifStream, ImageFormat.Gif);
+            gifStream.Position = 0;
 
-                    // Steal the global color table info
-                    if (_firstFrame)
-                        InitHeader(gifStream, _writer, Image.Width, Image.Height);
+            var h = Image.Height;
+            var w = Image.Width;
+            
+            Image.Save(gifStream, ImageFormat.Gif);
 
-                    WriteGraphicControlBlock(gifStream, _writer, Delay);
-                    WriteImageBlock(gifStream, _writer, !_firstFrame, 0, 0, Image.Width, Image.Height);
+            Image.Dispose();
 
-                    Image.Dispose();
-                }
+            // Steal the global color table info
+            if (_firstFrame)
+                InitHeader(gifStream, _writer, w, h);
 
+            WriteGraphicControlBlock(gifStream, _writer, Delay);
+            WriteImageBlock(gifStream, _writer, !_firstFrame, 0, 0, w, h);
+            
             if (_firstFrame)
                 _firstFrame = false;
         }
-        
+
         /// <summary>
         /// Writes a Image frame.
         /// </summary>
@@ -139,12 +140,14 @@ namespace Screna
             Writer.Write((byte)0); // Terminator
         }
 
+        static byte[] _buffer, _header = new byte[11];
+
         static void WriteImageBlock(Stream SourceGif, BinaryWriter Writer, bool IncludeColorTable, int X, int Y, int Width, int Height)
         {
             SourceGif.Position = SourceImageBlockPosition; // Locating the image block
-            var header = new byte[11];
-            SourceGif.Read(header, 0, header.Length);
-            Writer.Write(header[0]); // Separator
+            
+            SourceGif.Read(_header, 0, _header.Length);
+            Writer.Write(_header[0]); // Separator
             Writer.Write((short)X); // Position X
             Writer.Write((short)Y); // Position Y
             Writer.Write((short)Width); // Width
@@ -156,25 +159,29 @@ namespace Screna
                 Writer.Write((byte)(SourceGif.ReadByte() & 0x3f | 0x80)); // Enabling local color table
                 WriteColorTable(SourceGif, Writer);
             }
-            else Writer.Write((byte)(header[9] & 0x07 | 0x07)); // Disabling local color table
+            else Writer.Write((byte)(_header[9] & 0x07 | 0x07)); // Disabling local color table
 
-            Writer.Write(header[10]); // LZW Min Code Size
+            Writer.Write(_header[10]); // LZW Min Code Size
 
             // Read/Write image data
-            SourceGif.Position = SourceImageBlockPosition + header.Length;
+            SourceGif.Position = SourceImageBlockPosition + _header.Length;
 
             var dataLength = SourceGif.ReadByte();
             while (dataLength > 0)
             {
-                var imgData = new byte[dataLength];
-                SourceGif.Read(imgData, 0, dataLength);
-
+                if (_buffer == null || _buffer.Length < dataLength)
+                    _buffer = new byte[dataLength];
+                                                
+                SourceGif.Read(_buffer, 0, dataLength);
+                
                 Writer.Write((byte)dataLength);
-                Writer.Write(imgData, 0, dataLength);
+                Writer.Write(_buffer, 0, dataLength);
                 dataLength = SourceGif.ReadByte();
             }
 
             Writer.Write((byte)0); // Terminator
+
+            Writer.Flush();
         }
         #endregion
 
@@ -183,14 +190,13 @@ namespace Screna
         /// </summary>
         public void Dispose()
         {
-            lock (_syncLock)
-            {
-                // Complete File
-                _writer.Write((byte)0x3b); // File Trailer
+            // Complete File
+            _writer.Write((byte)0x3b); // File Trailer
 
-                _writer.BaseStream.Dispose();
-                _writer.Dispose();
-            }
+            _writer.BaseStream.Dispose();
+            _writer.Dispose();
+
+            gifStream.Dispose();
         }
     }
 }

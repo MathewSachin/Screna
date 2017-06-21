@@ -172,8 +172,9 @@ namespace Screna
         /// </summary>
         public static void Draw(this IOverlay overlay, Image img, Point Offset = default(Point))
         {
-            using (var g = Graphics.FromImage(img))
-                overlay.Draw(g, Offset);
+            if (img != null)
+                using (var g = Graphics.FromImage(img))
+                    overlay.Draw(g, Offset);
         }
 
         internal static Rectangle ToRectangle(this RECT r) => new Rectangle(r.Left, r.Top, r.Right - r.Left, r.Bottom - r.Top);

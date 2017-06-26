@@ -89,6 +89,8 @@ namespace Screna
             catch (Exception E)
             {
                 ErrorOccured?.Invoke(E);
+
+                Dispose(true, false);
             }
         }
 
@@ -114,6 +116,8 @@ namespace Screna
             catch (Exception E)
             {
                 ErrorOccured?.Invoke(E);
+
+                Dispose(false, true);
             }
         }
 
@@ -124,10 +128,7 @@ namespace Screna
         }
 
         #region Dispose
-        /// <summary>
-        /// Frees all resources used by this instance.
-        /// </summary>
-        public void Dispose()
+        void Dispose(bool TerminateRecord, bool TerminateWrite)
         {
             ThrowIfDisposed();
 
@@ -140,8 +141,11 @@ namespace Screna
 
                 _continueCapturing.Set();
 
-                _recordTask.Wait();
-                _writeTask.Wait();
+                if (TerminateRecord)
+                    _recordTask.Wait();
+
+                if (TerminateWrite)
+                    _writeTask.Wait();
 
                 _videoWriter.Dispose();
                 _frames.Dispose();
@@ -153,6 +157,14 @@ namespace Screna
             _imageProvider?.Dispose();
 
             _disposed = true;
+        }
+
+        /// <summary>
+        /// Frees all resources used by this instance.
+        /// </summary>
+        public void Dispose()
+        {
+            Dispose(true, true);
         }
 
         bool _disposed;

@@ -40,10 +40,7 @@ namespace Screna
         public WindowProvider(Func<Window> WindowFunction, Color BackgroundColor = default(Color))
             : base(DesktopRectangle)
         {
-            if (WindowFunction == null)
-                throw new ArgumentNullException(nameof(WindowFunction));
-
-            _windowFunction = WindowFunction;
+            _windowFunction = WindowFunction ?? throw new ArgumentNullException(nameof(WindowFunction));
             _backgroundColor = BackgroundColor;
         }
 

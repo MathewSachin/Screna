@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Threading;
+using System.Threading.Tasks;
 
 namespace Screna
 {
@@ -12,7 +13,7 @@ namespace Screna
         readonly GifWriter _videoEncoder;
         readonly IImageProvider _imageProvider;
 
-        readonly Thread _recordThread;
+        readonly Task _recordTask;
 
         readonly ManualResetEvent _stopCapturing = new ManualResetEvent(false),
             _continueCapturing = new ManualResetEvent(false);
@@ -30,18 +31,8 @@ namespace Screna
             _imageProvider = ImageProvider ?? throw new ArgumentNullException(nameof(ImageProvider));
             _videoEncoder = Encoder ?? throw new ArgumentNullException(nameof(Encoder));
             
-            // GifWriter.Init not needed.
-
-            // RecordThread Init
-            _recordThread = new Thread(Record)
-            {
-                Name = "Captura.Record",
-                IsBackground = true
-            };
-
-
             // Not Actually Started, Waits for _continueCapturing to be Set
-            _recordThread?.Start();
+            _recordTask = Task.Factory.StartNew(Record);
         }
 
         /// <summary>
@@ -49,20 +40,27 @@ namespace Screna
         /// </summary>
         public void Start() => _continueCapturing.Set();
 
+        void Dispose(bool ErrorOccured)
+        {
+            // Resume if Paused
+            _continueCapturing?.Set();
+            
+            _stopCapturing.Set();
+
+            if (!ErrorOccured)
+                _recordTask.Wait();
+
+            _imageProvider.Dispose();
+
+            _videoEncoder.Dispose();
+        }
+
         /// <summary>
         /// Frees resources.
         /// </summary>
         public void Dispose()
         {
-            // Resume if Paused
-            _continueCapturing?.Set();
-
-            // Video
-            _stopCapturing.Set();
-            _recordThread.Join();    
-            _imageProvider.Dispose();
-                        
-            _videoEncoder.Dispose();
+            Dispose(false);
         }
 
         /// <summary>
@@ -91,6 +89,8 @@ namespace Screna
             catch (Exception E)
             {
                 ErrorOccured?.Invoke(E);
+
+                Dispose(true);
             }
         }
 

@@ -72,7 +72,16 @@ namespace Screna
             {
                 while (!_frames.IsCompleted)
                 {
-                    _frames.TryTake(out var data);
+                    object data = null;
+
+                    try
+                    {
+                        data = _frames.Take();
+                    }
+                    catch (InvalidOperationException)
+                    {
+                        continue;
+                    }
 
                     switch (data)
                     {
